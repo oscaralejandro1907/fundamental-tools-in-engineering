@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Resources — Fundamental Tools in Engineering</title>
+<meta name="description" content="Reference cards: significant figures, unit conversions, and the rules the flight computer enforces.">
+<meta name="theme-color" content="#071523">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="./assets/style.css">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%23071523'/%3E%3Crect x='7' y='7' width='18' height='18' fill='none' stroke='%234fd1e8' stroke-width='2' transform='rotate(45 16 16)'/%3E%3Crect x='13' y='13' width='6' height='6' fill='%23ffb020'/%3E%3C/svg%3E">
+<style>
+  .ref { width: 100%; border-collapse: collapse; margin-top: 8px; font-size: 14px; }
+  .ref th, .ref td { text-align: left; padding: 11px 12px; border-bottom: 1px solid var(--line-coarse); }
+  .ref th { font-family: var(--mono); font-size: 9.5px; letter-spacing: .2em; text-transform: uppercase; color: var(--ink-faint); border-bottom-color: var(--line-hard); }
+  .ref td { color: var(--ink-soft); }
+  .ref td.m { font-family: var(--mono); color: var(--cyan-hot); }
+  .ref td.a { font-family: var(--mono); color: var(--amber-hot); }
+  .ref tr:hover td { background: rgba(79,209,232,.045); }
+</style>
+</head>
+<body>
+
+<div class="substrate" aria-hidden="true"></div>
+<div class="grain" aria-hidden="true"></div>
+<div class="crosshair" aria-hidden="true"><span></span></div>
+
+<nav class="nav">
+  <div class="nav-in">
+    <a class="brand" href="./index.html">
+      <span class="brand-mark" aria-hidden="true"></span>
+      <span class="brand-txt"><b>Drafting Table</b><small>MA1003B · Fundamental Tools</small></span>
+    </a>
+    <button class="nav-toggle" aria-expanded="false">[ MENU ]</button>
+    <ul class="nav-links">
+      <li><a href="./index.html">Activities</a></li>
+      <li><a href="./challenge.html">Challenge</a></li>
+      <li><a href="./roadmap.html">Roadmap</a></li>
+      <li><a href="./resources.html" aria-current="page">Resources</a></li>
+      <li><a href="./activities/mission-control/index.html">Launch ▸</a></li>
+    </ul>
+  </div>
+</nav>
+
+<main>
+
+<section class="hero" style="padding-bottom:30px">
+  <div class="shell">
+    <div class="eyebrow fade-up">Reference sheets · keep these open in class</div>
+    <h1>
+      <span class="ln"><span>Bench</span></span>
+      <span class="ln"><span class="outline">reference</span></span>
+    </h1>
+    <div class="dimline" aria-hidden="true"><i></i><b></b><span>Everything the flight computer checks</span></div>
+  </div>
+</section>
+
+<section class="sec" style="padding-top:10px">
+  <div class="shell">
+    <div class="two-col">
+
+      <div class="panel rv">
+        <span class="corner tl"></span><span class="corner tr"></span>
+        <span class="corner bl"></span><span class="corner br"></span>
+        <div class="eyebrow">Card 01</div>
+        <h3 style="margin:16px 0 6px">Significant figures</h3>
+        <table class="ref">
+          <tr><th>Value</th><th>S.F.</th><th>Why</th></tr>
+          <tr><td class="m">1250</td><td class="a">3</td><td>Trailing zero of a whole number is ambiguous — it does not count.</td></tr>
+          <tr><td class="m">1250.</td><td class="a">4</td><td>The written decimal point makes the zero deliberate.</td></tr>
+          <tr><td class="m">12.5</td><td class="a">3</td><td>Every digit was measured.</td></tr>
+          <tr><td class="m">0.0034</td><td class="a">2</td><td>Leading zeros only locate the decimal point.</td></tr>
+          <tr><td class="m">1.30</td><td class="a">3</td><td>A trailing zero <em>after</em> the point is a measurement claim.</td></tr>
+          <tr><td class="m">1.5e3</td><td class="a">2</td><td>Only the mantissa carries significance.</td></tr>
+        </table>
+        <div class="callout">
+          <div class="tiny">The two operations</div>
+          <p><strong>Multiply or divide</strong> — the result gets the <em>fewest</em> significant figures of any input.<br>
+          <strong>Add or subtract</strong> — the result gets the fewest <em>decimal places</em> of any input.</p>
+        </div>
+      </div>
+
+      <div class="panel rv" data-d="2">
+        <span class="corner tl"></span><span class="corner tr"></span>
+        <span class="corner bl"></span><span class="corner br"></span>
+        <div class="eyebrow amber">Card 02</div>
+        <h3 style="margin:16px 0 6px">Conversions you will need</h3>
+        <table class="ref">
+          <tr><th>From</th><th>To</th><th>Factor</th></tr>
+          <tr><td>cm</td><td>m</td><td class="m">÷ 100</td></tr>
+          <tr><td>mm</td><td>m</td><td class="m">÷ 1000</td></tr>
+          <tr><td>km/h</td><td>m/s</td><td class="m">÷ 3.6</td></tr>
+          <tr><td>lbf</td><td>N</td><td class="m">× 4.448</td></tr>
+          <tr><td>W·h</td><td>J</td><td class="m">× 3600</td></tr>
+          <tr><td>mAh @ V</td><td>J</td><td class="m">× V × 3.6</td></tr>
+        </table>
+        <h3 style="margin:30px 0 6px">Relations</h3>
+        <table class="ref">
+          <tr><th>Quantity</th><th>Relation</th><th>Unit</th></tr>
+          <tr><td>Average speed</td><td class="m">v = d / t</td><td class="a">m/s</td></tr>
+          <tr><td>Electrical power</td><td class="m">P = V · I</td><td class="a">W</td></tr>
+          <tr><td>Energy</td><td class="m">E = P · t</td><td class="a">J</td></tr>
+          <tr><td>Wheel circumference</td><td class="m">C = π · D</td><td class="a">m</td></tr>
+          <tr><td>Revolutions</td><td class="m">n = d / C</td><td class="a">rev</td></tr>
+        </table>
+      </div>
+
+    </div>
+
+    <div class="panel rv" data-d="3" style="margin-top:18px">
+      <span class="corner tl"></span><span class="corner tr"></span>
+      <span class="corner bl"></span><span class="corner br"></span>
+      <div class="three-col">
+        <div class="prose">
+          <div class="eyebrow">Card 03</div>
+          <h3 style="margin-top:16px">Rejection codes</h3>
+          <ul>
+            <li><strong>UNIT MISMATCH</strong> — right idea, wrong quantity. Re-read what was asked.</li>
+            <li><strong>UNVERIFIABLE PRECISION</strong> — you claimed digits you never measured, or threw away digits you had.</li>
+            <li><strong>VALUE OUT OF RANGE</strong> — units and precision fine, arithmetic is not.</li>
+            <li><strong>SIGNAL LOST</strong> — the window closed. A late number is no number.</li>
+          </ul>
+        </div>
+        <div class="prose">
+          <h3 style="margin-top:0">Before you transmit</h3>
+          <ul>
+            <li>Did I convert every input to a consistent system first?</li>
+            <li>Which input has the fewest significant figures? That governs the answer.</li>
+            <li>Does the magnitude make physical sense for a small vehicle?</li>
+            <li>Is the unit in the dropdown the one the question asked for?</li>
+          </ul>
+        </div>
+        <div class="prose">
+          <h3 style="margin-top:0">In the field</h3>
+          <ul>
+            <li>Repeat every run at least three times.</li>
+            <li>Write the raw reading down before you calculate anything.</li>
+            <li>Record the instrument, not just the number — "±0.2 s, human stopwatch".</li>
+            <li>Never silently drop an outlier. Note it and explain it.</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel rv" data-d="4" style="margin-top:18px">
+      <span class="corner tl"></span><span class="corner br"></span>
+      <div class="eyebrow amber">Card 04 · for the teacher</div>
+      <h3 style="margin:16px 0 12px">Running an activity in class</h3>
+      <div class="three-col" style="gap:26px">
+        <div class="prose">
+          <h4>Setup</h4>
+          <ul>
+            <li>One device per team of four, not per student.</li>
+            <li>Project the site on the room screen while teams play.</li>
+            <li>Works with no internet once the page has loaded.</li>
+          </ul>
+        </div>
+        <div class="prose">
+          <h4>During</h4>
+          <ul>
+            <li>Do not answer "is this right?" — the flight computer does that.</li>
+            <li>Do answer "what does this rejection code mean?".</li>
+            <li>Note which round most teams lose. That is your debrief.</li>
+          </ul>
+        </div>
+        <div class="prose">
+          <h4>After</h4>
+          <ul>
+            <li>Scores read aloud; the log table is the discussion material.</li>
+            <li>"Show the reasoning" reveals every explanation at once.</li>
+            <li>Close by mapping each round onto a real vehicle measurement.</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+</main>
+
+<footer class="foot">
+  <div class="foot-grid">
+    <div>
+      <span>Drawing title</span>
+      <strong>Bench reference</strong>
+      <p style="margin-top:10px">Significant figures, conversions, relations, rejection codes.</p>
+    </div>
+    <div><span>Sheet</span><strong>04 / 06</strong><p style="margin-top:10px">Resources</p></div>
+    <div><span>Scale</span><strong>1 : 1</strong><p style="margin-top:10px">Runs offline in-browser</p></div>
+    <div>
+      <span>Navigate</span>
+      <a href="./index.html">Activities</a>
+      <a href="./challenge.html">Challenge brief</a>
+      <a href="./roadmap.html">Session roadmap</a>
+      <a href="./resources.html">Resources</a>
+    </div>
+  </div>
+  <div class="foot-bar">
+    <span>MA1003B · Semestral Ago–Dic <span data-year>2026</span></span>
+    <span>Built for the classroom · No accounts · No tracking</span>
+  </div>
+</footer>
+
+<script src="./assets/app.js"></script>
+</body>
+</html>

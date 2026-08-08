@@ -1,0 +1,613 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ACT-01 · Mission Control — Vehicle Zero</title>
+<meta name="description" content="Six rounds of telemetry. Convert, compute, transmit. The flight computer rejects any number you cannot defend.">
+<meta name="theme-color" content="#071523">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="../../assets/style.css">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%23071523'/%3E%3Crect x='7' y='7' width='18' height='18' fill='none' stroke='%234fd1e8' stroke-width='2' transform='rotate(45 16 16)'/%3E%3Crect x='13' y='13' width='6' height='6' fill='%23ffb020'/%3E%3C/svg%3E">
+
+<style>
+/* ============================================================
+   ACT-01 — game shell, blueprint dialect
+   All styles scoped to #app so the site chrome is untouched.
+   ============================================================ */
+
+.mc-wrap { padding: 34px 0 70px; }
+
+/* ---------- mission strip above the console ---------- */
+.mc-strip {
+  display: flex; align-items: center; justify-content: space-between;
+  flex-wrap: wrap; gap: 14px;
+  padding-bottom: 18px; margin-bottom: 22px;
+  border-bottom: 1px solid var(--line-hard);
+}
+.mc-strip .eyebrow { font-size: 10.5px; }
+.mc-back {
+  font-family: var(--mono); font-size: 10.5px; letter-spacing: .18em;
+  text-transform: uppercase; color: var(--ink-faint);
+  display: inline-flex; align-items: center; gap: 9px;
+  transition: color .25s, gap .3s var(--ease);
+}
+.mc-back:hover { color: var(--cyan); gap: 14px; }
+
+#app { position: relative; z-index: 5; }
+
+/* ---------- panels ---------- */
+#app .panel {
+  position: relative;
+  background: var(--paper-raised);
+  border: 1px solid var(--line-coarse);
+  padding: clamp(22px, 3.2vw, 38px);
+}
+#app .panel::before {
+  content: '';
+  position: absolute; inset: 0; pointer-events: none;
+  background-image:
+    linear-gradient(to right, var(--line-fine) 1px, transparent 1px),
+    linear-gradient(to bottom, var(--line-fine) 1px, transparent 1px);
+  background-size: 24px 24px;
+}
+#app .panel > * { position: relative; }
+
+/* ---------- type ---------- */
+#app .kicker {
+  font-family: var(--mono); font-size: 10.5px; font-weight: 500;
+  letter-spacing: .26em; text-transform: uppercase; color: var(--amber);
+  display: flex; align-items: center; gap: 12px;
+}
+#app .kicker::before { content: ''; width: 30px; height: 1px; background: var(--amber); flex: none; }
+
+#app h1 {
+  font-family: var(--display); font-weight: 900;
+  font-size: clamp(44px, 8vw, 92px); line-height: .88;
+  letter-spacing: .01em; text-transform: uppercase;
+  margin: 18px 0 20px;
+}
+#app h1 .out { color: transparent; -webkit-text-stroke: 1.6px var(--cyan); }
+#app h2 {
+  font-family: var(--display); font-weight: 800;
+  font-size: clamp(28px, 4.4vw, 46px); line-height: .95;
+  text-transform: uppercase; letter-spacing: .015em; margin: 0 0 10px;
+}
+#app p.lead { color: var(--ink-soft); font-size: 16px; line-height: 1.7; max-width: 64ch; }
+#app p.lead strong { color: var(--ink); font-weight: 600; }
+#app .hint {
+  font-family: var(--mono); font-size: 11px; line-height: 1.75;
+  letter-spacing: .06em; color: var(--ink-faint); margin-top: 16px;
+}
+#app .hint code {
+  background: rgba(79,209,232,.1); border: 1px solid var(--line-coarse);
+  padding: 1px 6px; color: var(--cyan-hot);
+}
+
+#app .row { display: flex; gap: 14px; flex-wrap: wrap; }
+#app .spacer { flex: 1; }
+#app .hide { display: none; }
+
+/* ---------- controls ---------- */
+#app button {
+  font-family: var(--mono); font-size: 11.5px; font-weight: 500;
+  letter-spacing: .2em; text-transform: uppercase;
+  padding: 15px 26px; border: 1px solid var(--amber);
+  background: transparent; color: var(--ink);
+  position: relative; overflow: hidden; isolation: isolate;
+  transition: color .3s, transform .3s var(--ease), border-color .3s;
+}
+#app button::before {
+  content: ''; position: absolute; inset: 0; z-index: -1;
+  background: var(--amber); transform: translateY(101%);
+  transition: transform .42s var(--ease);
+}
+#app button:hover:not(:disabled) { color: var(--paper-deep); transform: translateY(-2px); }
+#app button:hover:not(:disabled)::before { transform: translateY(0); }
+#app button:active:not(:disabled) { transform: translateY(0); }
+#app button.ghost { border-color: var(--line-hard); color: var(--ink-soft); }
+#app button.ghost::before { background: var(--cyan); }
+#app button.ghost:hover { color: var(--paper-deep); border-color: var(--cyan); }
+#app button:disabled { opacity: .4; cursor: not-allowed; }
+
+#app input[type=text], #app select {
+  font-family: var(--mono); font-size: 18px; font-weight: 500;
+  background: var(--paper-deep); color: var(--ink);
+  border: 1px solid var(--line-hard); border-radius: 0;
+  padding: 14px 16px; width: 220px;
+  transition: border-color .25s, box-shadow .25s;
+}
+#app input[type=text]::placeholder { color: var(--ink-faint); letter-spacing: .12em; font-size: 14px; text-transform: uppercase; }
+#app input[type=text]:focus, #app select:focus {
+  outline: none; border-color: var(--cyan);
+  box-shadow: 0 0 0 1px var(--cyan), 0 0 26px rgba(79,209,232,.16);
+}
+#app select { width: auto; font-size: 16px; cursor: pointer; }
+#app select option { background: var(--paper-deep); }
+
+/* ---------- HUD ---------- */
+#hud {
+  display: flex; align-items: flex-end; gap: 26px;
+  flex-wrap: wrap; margin-bottom: 14px;
+}
+#hud .tag {
+  font-family: var(--mono); font-size: 9.5px; letter-spacing: .22em;
+  text-transform: uppercase; color: var(--ink-faint); margin-bottom: 3px;
+}
+#hud .val {
+  font-family: var(--display); font-size: 34px; font-weight: 800;
+  line-height: .9; letter-spacing: .03em; color: var(--ink);
+}
+#hud #clock { color: var(--amber); font-variant-numeric: tabular-nums; }
+
+#bar {
+  height: 3px; background: var(--line-coarse);
+  overflow: hidden; margin-bottom: 24px; position: relative;
+}
+#barfill {
+  height: 100%; width: 100%;
+  background: linear-gradient(90deg, var(--amber), var(--amber-hot));
+  transition: width .95s linear;
+}
+#barfill.warn {
+  background: linear-gradient(90deg, var(--red), #ff9a94);
+  animation: mcAlarm 1s steps(2) infinite;
+}
+@keyframes mcAlarm { 50% { opacity: .45; } }
+
+/* ---------- telemetry readout ---------- */
+.tele {
+  position: relative;
+  background: var(--paper-deep);
+  border: 1px solid var(--line-hard);
+  padding: 20px 22px; margin: 4px 0 22px;
+  overflow: hidden;
+}
+.tele::after {
+  /* scanline wash */
+  content: ''; position: absolute; inset: 0; pointer-events: none;
+  background: repeating-linear-gradient(180deg, rgba(79,209,232,.05) 0 1px, transparent 1px 3px);
+  opacity: .7;
+}
+.tele .th {
+  font-family: var(--mono); font-size: 9.5px; letter-spacing: .26em;
+  color: var(--cyan); margin-bottom: 13px;
+  display: flex; align-items: center; gap: 10px;
+}
+.tele .th::after {
+  content: ''; flex: 1; height: 1px;
+  background: linear-gradient(90deg, var(--line-hard), transparent);
+}
+.tele .line {
+  font-family: var(--mono); font-size: 15px; line-height: 1.95;
+  white-space: pre-wrap; color: var(--ink-soft);
+  position: relative; z-index: 1;
+}
+.tele .line b { color: var(--amber-hot); font-weight: 600; }
+
+.qtext {
+  font-family: var(--display); font-weight: 700;
+  font-size: clamp(22px, 3vw, 30px); line-height: 1.1;
+  letter-spacing: .015em; text-transform: uppercase;
+  color: var(--ink); margin: 0 0 20px;
+}
+
+/* ---------- feedback ---------- */
+.feedback {
+  display: none; margin-top: 18px; padding: 16px 20px;
+  font-size: 14.5px; line-height: 1.65;
+  border-left: 2px solid; animation: mcIn .4s var(--ease);
+}
+@keyframes mcIn { from { opacity: 0; transform: translateY(8px); } }
+.feedback .code {
+  display: block; margin-bottom: 6px;
+  font-family: var(--mono); font-size: 10.5px; font-weight: 600;
+  letter-spacing: .24em; text-transform: uppercase;
+  background: none; border: 0; padding: 0;
+}
+.feedback.bad {
+  border-color: var(--red); color: #ffd9d6;
+  background: linear-gradient(90deg, rgba(255,95,86,.11), transparent 78%);
+}
+.feedback.bad .code { color: var(--red); }
+.feedback.good {
+  border-color: var(--green); color: #d6f5e2;
+  background: linear-gradient(90deg, rgba(82,227,164,.11), transparent 78%);
+}
+.feedback.good .code { color: var(--green); }
+
+/* ---------- progress steps ---------- */
+.steps { display: flex; gap: 6px; margin-top: 26px; }
+.step {
+  flex: 1; height: 3px; background: var(--line-coarse);
+  transition: background .45s var(--ease);
+}
+.step.done { background: var(--green); }
+.step.miss { background: var(--red); }
+.step.now  { background: var(--amber); animation: mcPulseStep 1.6s ease-in-out infinite; }
+@keyframes mcPulseStep { 50% { opacity: .35; } }
+
+/* ---------- debrief table ---------- */
+#app table {
+  border-collapse: collapse; width: 100%;
+  margin-top: 22px; font-size: 13.5px;
+}
+#app th, #app td {
+  text-align: left; padding: 11px 12px;
+  border-bottom: 1px solid var(--line-coarse);
+}
+#app th {
+  font-family: var(--mono); font-size: 9.5px; font-weight: 500;
+  letter-spacing: .2em; text-transform: uppercase; color: var(--ink-faint);
+  border-bottom-color: var(--line-hard);
+}
+#app td { color: var(--ink-soft); }
+#app td.mono { font-family: var(--mono); font-weight: 500; }
+#app tr:hover td { background: rgba(79,209,232,.04); }
+#app .ok { color: var(--green); }
+#app .no { color: var(--red); }
+
+.big {
+  font-family: var(--display); font-weight: 900;
+  font-size: clamp(56px, 9vw, 88px); line-height: .85;
+  letter-spacing: .01em;
+}
+
+@media (max-width: 640px) {
+  #app input[type=text] { width: 100%; }
+  #hud { gap: 18px; }
+  #hud .val { font-size: 26px; }
+}
+</style>
+</head>
+<body>
+
+<div class="substrate" aria-hidden="true"></div>
+<div class="grain" aria-hidden="true"></div>
+<div class="crosshair" aria-hidden="true"><span></span></div>
+
+<!-- ===================== NAV ===================== -->
+<nav class="nav">
+  <div class="nav-in">
+    <a class="brand" href="../../index.html">
+      <span class="brand-mark" aria-hidden="true"></span>
+      <span class="brand-txt">
+        <b>Drafting Table</b>
+        <small>MA1003B · Fundamental Tools</small>
+      </span>
+    </a>
+    <button class="nav-toggle" aria-expanded="false">[ MENU ]</button>
+    <ul class="nav-links">
+      <li><a href="../../index.html">Activities</a></li>
+      <li><a href="../../challenge.html">Challenge</a></li>
+      <li><a href="../../roadmap.html">Roadmap</a></li>
+      <li><a href="../../resources.html">Resources</a></li>
+    </ul>
+  </div>
+</nav>
+
+<main class="shell mc-wrap">
+  <div class="mc-strip">
+    <div class="eyebrow amber">ACT-01 · Session 01 · Telemetry drill</div>
+    <a class="mc-back" href="../../index.html"><span aria-hidden="true">◂</span> Back to activities</a>
+  </div>
+
+  <div id="app"></div>
+</main>
+
+<footer class="foot">
+  <div class="foot-bar">
+    <span>ACT-01 · Mission Control · Vehicle Zero</span>
+    <span>Runs offline · Nothing uploaded · Nothing saved</span>
+  </div>
+</footer>
+
+<script src="../../assets/app.js"></script>
+<script>
+/* ============================================================
+   MISSION CONTROL — VEHICLE ZERO
+   Module 3, Fundamental Tools in Engineering — Session 1
+   Single file. Runs offline. No install, no account, no network.
+   ============================================================ */
+
+/* ---------- significant-figure counter (the heart of the game) ---------- */
+function countSigFigs(raw){
+  let s = String(raw).trim().replace(/^[+-]/,"");
+  if(!s) return 0;
+  // scientific notation: only the mantissa carries significance
+  const sci = s.match(/^([0-9]*\.?[0-9]+)\s*(?:e|E|x10\^|\*10\^)\s*[+-]?\d+$/);
+  if(sci) s = sci[1];
+  if(!/^[0-9]*\.?[0-9]*$/.test(s) || !/[0-9]/.test(s)) return -1;   // not a plain number
+  if(s.includes(".")){
+    let d = s.replace(".","").replace(/^0+/,"");   // leading zeros never count
+    return d.length;                               // trailing zeros after a point DO count
+  }
+  let d = s.replace(/^0+/,"");
+  d = d.replace(/0+$/,"");                         // trailing zeros in a whole number: ambiguous
+  return d.length || 1;
+}
+function parseNum(raw){
+  const s = String(raw).trim().replace(/\s/g,"").replace(/x10\^/i,"e").replace(/\*10\^/i,"e");
+  const v = Number(s);
+  return isFinite(v) ? v : NaN;
+}
+
+/* ---------- the six rounds ---------- */
+const ROUNDS = [
+  {
+    code:"T-06  PRE-FLIGHT",
+    telemetry:[["TRACK LENGTH","1250 cm"],["SURFACE","dry concrete"]],
+    question:"Report the track length in metres.",
+    answer:12.5, unit:"m", sf:3,
+    units:["m","km","cm","mm"],
+    why:"1250 cm carries 3 significant figures — the trailing zero of a whole number is not significant. Divide by 100: 12.5 m."
+  },
+  {
+    code:"T-05  VELOCITY CHECK",
+    telemetry:[["TRACK LENGTH","12.5 m"],["RUN TIME","3.4 s"]],
+    question:"What was the average speed over the run?",
+    answer:3.7, unit:"m/s", sf:2,
+    units:["m/s","km/h","m","s"],
+    why:"12.5 / 3.4 = 3.676… but 3.4 s has only 2 significant figures, so the answer gets 2: 3.7 m/s."
+  },
+  {
+    code:"T-04  POWER BUDGET",
+    telemetry:[["BATTERY VOLTAGE","7.4 V"],["MOTOR CURRENT","1.30 A"]],
+    question:"How much electrical power is the motor drawing?  (P = V · I)",
+    answer:9.6, unit:"W", sf:2,
+    units:["W","kW","J","V"],
+    why:"7.4 × 1.30 = 9.62. The 7.4 V has only 2 significant figures, so the answer gets 2: 9.6 W."
+  },
+  {
+    code:"T-03  ENERGY DRAW",
+    telemetry:[["MOTOR POWER","9.6 W"],["RUN TIME","3.4 s"]],
+    question:"How much energy did the run consume?  (E = P · t)",
+    answer:33, unit:"J", sf:2,
+    units:["J","kJ","W","W·h"],
+    why:"9.6 × 3.4 = 32.64. Both factors have 2 significant figures, so the answer does too: 33 J."
+  },
+  {
+    code:"T-02  DRIVETRAIN",
+    telemetry:[["WHEEL DIAMETER","65 mm"],["TRACK LENGTH","12.5 m"]],
+    question:"How many full revolutions does a wheel make over the track?",
+    answer:61, unit:"rev", sf:2,
+    units:["rev","m","mm","rad"],
+    why:"Circumference = π × 0.065 m = 0.2042 m. Then 12.5 / 0.2042 = 61.2. The 65 mm has 2 significant figures, so: 61 revolutions."
+  },
+  {
+    code:"T-01  FINAL BURN",
+    telemetry:[["SUPPLIER SPEC SHEET","MAX THRUST IMPULSE  3.5 lbf·s"],["FLIGHT SOFTWARE EXPECTS","N·s"],["CONVERSION","1 lbf = 4.448 N"]],
+    question:"Convert the thrust impulse into the unit the flight software expects.",
+    answer:16, unit:"N·s", sf:2,
+    units:["N·s","lbf·s","N","kg·m/s"],
+    why:"3.5 × 4.448 = 15.568 → 16 N·s (2 significant figures). Submitting 3.5 unconverted is exactly what destroyed the Mars Climate Orbiter in 1999."
+  }
+];
+
+const ROUND_TIME = 120, BASE = 100, RETRY_COST = 30;
+
+/* ---------- state ---------- */
+let team="", idx=0, score=0, attempt=0, tLeft=ROUND_TIME, timer=null, log=[];
+const app = document.getElementById("app");
+const esc = t => String(t).replace(/[&<>]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;"}[c]));
+
+/* ---------- screens ---------- */
+function screenIntro(){
+  stopTimer();
+  app.innerHTML = `
+    <div class="panel">
+      <div class="kicker">Module 3 · Fundamental Tools in Engineering · Session 1</div>
+      <h1>Mission&nbsp;Control<br><span class="out">Vehicle&nbsp;Zero</span></h1>
+      <p class="lead">Your team is mission control for a scale electric vehicle. Six rounds of telemetry
+      will arrive, each in whatever units the supplier happened to use. Convert, calculate, and submit.</p>
+      <p class="lead" style="margin-top:14px"><strong>The flight computer rejects
+      any number you cannot defend</strong> — wrong unit, wrong precision, or wrong value. It will tell you
+      which one, never the answer.</p>
+      <div class="row" style="margin-top:30px;align-items:center">
+        <input type="text" id="team" placeholder="Team name" style="width:280px;font-size:16px">
+        <button class="primary" id="go">Begin countdown</button>
+      </div>
+      <div class="hint">Runs entirely on this device. Nothing is uploaded, nothing is saved.<br>
+      Read your final score aloud to the class when you finish.</div>
+    </div>`;
+  const inp = document.getElementById("team");
+  const start = () => { team = inp.value.trim() || "Unnamed team"; idx=0; score=0; log=[]; screenRound(); };
+  document.getElementById("go").onclick = start;
+  inp.onkeydown = e => { if(e.key === "Enter") start(); };
+  inp.focus();
+}
+
+function screenRound(){
+  const r = ROUNDS[idx];
+  attempt = 0; tLeft = ROUND_TIME;
+
+  const teleLines = r.telemetry.map(t =>
+    `${t[0].padEnd(26,".")}  <b>${esc(t[1])}</b>`).join("\n");
+  const opts = r.units.map(u => `<option value="${esc(u)}">${esc(u)}</option>`).join("");
+  const steps = ROUNDS.map((_,i) =>
+    `<div class="step ${i<idx?(log[i]&&log[i].ok?'done':'miss'):(i===idx?'now':'')}"></div>`).join("");
+
+  app.innerHTML = `
+    <div id="hud">
+      <div><div class="tag">ROUND</div><div class="val">${idx+1} / ${ROUNDS.length}</div></div>
+      <div><div class="tag">SCORE</div><div class="val" id="score">${score}</div></div>
+      <div class="spacer"></div>
+      <div style="text-align:right"><div class="tag">${esc(r.code)}</div>
+        <div class="val" id="clock">${fmt(tLeft)}</div></div>
+    </div>
+    <div id="bar"><div id="barfill"></div></div>
+
+    <div class="panel">
+      <div class="tele">
+        <div class="th">INCOMING TELEMETRY</div>
+        <div class="line">${teleLines}</div>
+      </div>
+      <div class="qtext">${esc(r.question)}</div>
+      <div class="row" style="align-items:center">
+        <input type="text" id="ans" placeholder="value" autocomplete="off">
+        <select id="unit">${opts}</select>
+        <button class="primary" id="send">Transmit</button>
+      </div>
+      <div class="hint">Type the number exactly as you would write it in a report — the trailing zeros
+      matter. Scientific notation such as <code>1.5e3</code> is accepted.</div>
+      <div class="feedback" id="fb"></div>
+      <div class="steps">${steps}</div>
+    </div>`;
+
+  const ans = document.getElementById("ans");
+  document.getElementById("send").onclick = submit;
+  ans.onkeydown = e => { if(e.key === "Enter") submit(); };
+  ans.focus();
+  startTimer();
+}
+
+function fmt(s){ return String(Math.floor(s/60)) + ":" + String(s%60).padStart(2,"0"); }
+
+function startTimer(){
+  stopTimer();
+  timer = setInterval(() => {
+    tLeft--;
+    const c = document.getElementById("clock"), b = document.getElementById("barfill");
+    if(!c){ stopTimer(); return; }
+    c.textContent = fmt(Math.max(tLeft,0));
+    b.style.width = Math.max(0, tLeft/ROUND_TIME*100) + "%";
+    if(tLeft <= 20){ b.classList.add("warn"); c.style.color = "var(--red)"; }
+    if(tLeft <= 0){ stopTimer(); timeUp(); }
+  }, 1000);
+}
+function stopTimer(){ if(timer){ clearInterval(timer); timer = null; } }
+
+function timeUp(){
+  const r = ROUNDS[idx];
+  log.push({ round:idx+1, code:r.code, ok:false, given:"— no transmission —",
+             expect:r.answer + " " + r.unit + " (" + r.sf + " s.f.)", pts:0, why:r.why });
+  show("bad", "SIGNAL LOST", "The window closed before you transmitted. In flight, a late number is the same as no number.");
+  setTimeout(next, 2600);
+}
+
+function submit(){
+  const r = ROUNDS[idx];
+  const raw = document.getElementById("ans").value;
+  const unit = document.getElementById("unit").value;
+  if(!raw.trim()){ show("bad","EMPTY TRANSMISSION","The flight computer received no value."); return; }
+
+  const sf = countSigFigs(raw), val = parseNum(raw);
+  if(isNaN(val) || sf < 0){ show("bad","MALFORMED VALUE","That is not a number the flight computer can read."); return; }
+
+  let err = null;
+  if(unit !== r.unit){
+    err = ["UNIT MISMATCH", "The flight computer expected a different quantity. Check what the question is actually asking for — and what units the inputs came in."];
+  } else if(sf !== r.sf){
+    err = ["UNVERIFIABLE PRECISION",
+      sf > r.sf
+        ? "You transmitted " + sf + " significant figures. The measurements you were given do not support that many — you are claiming precision you never measured."
+        : "You transmitted only " + sf + " significant figures. You are throwing away precision you actually had."];
+  } else if(Math.abs(val - r.answer) > Math.abs(r.answer)*1e-6 + 1e-9){
+    err = ["VALUE OUT OF RANGE", "Units and precision are correct. The arithmetic is not — re-check your conversion."];
+  }
+
+  if(err){
+    attempt++;
+    if(attempt >= 2){
+      log.push({ round:idx+1, code:r.code, ok:false, given:raw + " " + unit,
+                 expect:r.answer + " " + r.unit + " (" + r.sf + " s.f.)", pts:0, why:r.why });
+      show("bad", err[0], err[1] + "  Second rejection — the window is closed on this one.");
+      stopTimer(); setTimeout(next, 3400);
+    } else {
+      show("bad", err[0], err[1] + "  One resubmission allowed, for " + RETRY_COST + " points less.");
+      document.getElementById("ans").select();
+    }
+    return;
+  }
+
+  stopTimer();
+  const timeBonus = Math.max(0, Math.round(tLeft/2));
+  const pts = Math.max(0, BASE - attempt*RETRY_COST) + timeBonus;
+  score += pts;
+  log.push({ round:idx+1, code:r.code, ok:true, given:raw + " " + unit,
+             expect:r.answer + " " + r.unit + " (" + r.sf + " s.f.)", pts, why:r.why });
+  document.getElementById("score").textContent = score;
+  show("good", "ACCEPTED  +" + pts + " PTS", r.why);
+  setTimeout(next, 3200);
+}
+
+function show(kind, code, text){
+  const fb = document.getElementById("fb");
+  fb.className = "feedback " + kind;
+  fb.innerHTML = '<span class="code">' + esc(code) + "</span>" + esc(text);
+  fb.style.display = "block";
+}
+
+function next(){
+  idx++;
+  if(idx >= ROUNDS.length) screenEnd(); else screenRound();
+}
+
+function screenEnd(){
+  stopTimer();
+  const good = log.filter(l => l.ok).length;
+  const perfect = good === ROUNDS.length;
+  const maxScore = ROUNDS.length * (BASE + ROUND_TIME/2);
+
+  const rows = log.map(l => `
+    <tr>
+      <td class="mono">${l.round}</td>
+      <td>${esc(l.code)}</td>
+      <td class="mono ${l.ok?'ok':'no'}">${esc(l.given)}</td>
+      <td class="mono">${esc(l.expect)}</td>
+      <td class="mono ${l.ok?'ok':'no'}">${l.ok ? "+"+l.pts : "0"}</td>
+    </tr>`).join("");
+
+  app.innerHTML = `
+    <div class="panel">
+      <div class="kicker">${perfect ? "RUN COMPLETE" : "MISSION ANOMALY"}</div>
+      <h2 style="margin-top:16px">${perfect
+        ? "Vehicle Zero crossed the line."
+        : "Vehicle Zero did not finish the run."}</h2>
+      <p class="lead">${perfect
+        ? "Every number you transmitted was one you could defend — correct unit, correct precision, correct value. That is the whole job."
+        : "You lost " + (ROUNDS.length-good) + " of " + ROUNDS.length + " rounds. On 23 September 1999 NASA lost the Mars Climate Orbiter to a single unconverted unit, at a cost of 327 million dollars. Your telemetry log is below."}</p>
+
+      <div class="row" style="margin:30px 0 6px;align-items:flex-end;gap:38px">
+        <div>
+          <div class="tag" style="font-family:var(--mono);font-size:9.5px;letter-spacing:.22em;text-transform:uppercase;color:var(--ink-faint);margin-bottom:6px">FINAL SCORE</div>
+          <div class="big" style="color:${perfect?'var(--green)':'var(--amber)'}">${score}</div>
+        </div>
+        <div>
+          <div class="tag" style="font-family:var(--mono);font-size:9.5px;letter-spacing:.22em;text-transform:uppercase;color:var(--ink-faint);margin-bottom:6px">ROUNDS CLEARED</div>
+          <div class="big" style="font-size:48px">${good} <span style="color:var(--ink-faint);font-size:24px">/ ${ROUNDS.length}</span></div>
+        </div>
+        <div>
+          <div class="tag" style="font-family:var(--mono);font-size:9.5px;letter-spacing:.22em;text-transform:uppercase;color:var(--ink-faint);margin-bottom:6px">TEAM</div>
+          <div style="font-family:var(--display);font-size:32px;font-weight:800;text-transform:uppercase;letter-spacing:.02em;padding-bottom:4px">${esc(team)}</div>
+        </div>
+      </div>
+      <div class="hint">Maximum possible: ${maxScore}. Read your score aloud to the class.</div>
+
+      <table>
+        <tr><th>#</th><th>Round</th><th>You sent</th><th>Accepted answer</th><th>Pts</th></tr>
+        ${rows}
+      </table>
+
+      <div class="row" style="margin-top:30px">
+        <button class="primary" id="again">Run it again</button>
+        <button class="ghost" id="reasons">Show the reasoning</button>
+      </div>
+      <div id="whybox" class="hide" style="margin-top:20px"></div>
+    </div>`;
+
+  document.getElementById("again").onclick = screenIntro;
+  document.getElementById("reasons").onclick = () => {
+    const box = document.getElementById("whybox");
+    box.classList.toggle("hide");
+    box.innerHTML = log.map(l =>
+      `<div class="tele" style="margin:10px 0"><div class="th">ROUND ${l.round} — ${esc(l.code)}</div>
+       <div style="font-size:14px;line-height:1.7;color:var(--ink-soft);position:relative;z-index:1">${esc(l.why)}</div></div>`).join("");
+  };
+}
+
+screenIntro();
+</script>
+</body>
+</html>

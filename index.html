@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The Drafting Table — Fundamental Tools in Engineering</title>
+<meta name="description" content="Interactive activities for the Fundamental Tools module of Innovative Perspectives in Engineering. Measure, convert, compute, defend your numbers.">
+<meta name="theme-color" content="#071523">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="./assets/style.css">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%23071523'/%3E%3Crect x='7' y='7' width='18' height='18' fill='none' stroke='%234fd1e8' stroke-width='2' transform='rotate(45 16 16)'/%3E%3Crect x='13' y='13' width='6' height='6' fill='%23ffb020'/%3E%3C/svg%3E">
+</head>
+<body>
+
+<div class="substrate" aria-hidden="true"></div>
+<div class="grain" aria-hidden="true"></div>
+<div class="sweep" aria-hidden="true"></div>
+<div class="crosshair" aria-hidden="true"><span></span></div>
+
+<!-- ===================== NAV ===================== -->
+<nav class="nav">
+  <div class="nav-in">
+    <a class="brand" href="./index.html">
+      <span class="brand-mark" aria-hidden="true"></span>
+      <span class="brand-txt">
+        <b>Drafting Table</b>
+        <small>MA1003B · Fundamental Tools</small>
+      </span>
+    </a>
+    <button class="nav-toggle" aria-expanded="false">[ MENU ]</button>
+    <ul class="nav-links">
+      <li><a href="./index.html" aria-current="page">Activities</a></li>
+      <li><a href="./challenge.html">Challenge</a></li>
+      <li><a href="./roadmap.html">Roadmap</a></li>
+      <li><a href="./resources.html">Resources</a></li>
+      <li><a href="./activities/mission-control/index.html">Launch ▸</a></li>
+    </ul>
+  </div>
+</nav>
+
+<main>
+
+<!-- ===================== HERO ===================== -->
+<section class="hero">
+  <div class="shell">
+    <div class="hero-grid">
+
+      <div class="hero-copy">
+        <div class="eyebrow fade-up">Innovative Perspectives in Engineering · Module 3</div>
+
+        <h1>
+          <span class="ln"><span>Fundamental</span></span>
+          <span class="ln"><span class="outline">Tools</span></span>
+          <span class="ln"><span>in Engineering</span></span>
+        </h1>
+
+        <div class="dimline" aria-hidden="true">
+          <i></i><b></b><span>80 min · on site · teams of four</span>
+        </div>
+
+        <p class="lede fade-up d1">
+          Every activity in this module is a working instrument, not a worksheet. You will
+          <span class="hl">measure something real</span>, force it through the right units,
+          carry the precision you actually earned, and then defend the number in front of
+          a machine that will not accept hand-waving.
+        </p>
+
+        <div class="hero-actions fade-up d2">
+          <a class="btn amber" href="./activities/mission-control/index.html">
+            Launch Mission Control <span class="arw">▸</span>
+          </a>
+          <a class="btn ghost" href="#activities">
+            All activities <span class="arw">▾</span>
+          </a>
+        </div>
+      </div>
+
+      <!-- ---------- schematic panel ---------- -->
+      <div class="schematic">
+        <span class="corner tl"></span><span class="corner tr"></span>
+        <span class="corner bl"></span><span class="corner br"></span>
+
+        <div class="schematic-head">
+          <span>DWG · VEHICLE ZERO · ISO VIEW</span>
+          <b>REV C</b>
+        </div>
+
+        <div class="iso-stage">
+          <div class="iso-tilt">
+            <div class="iso-float">
+            <svg class="iso" viewBox="0 0 470 290" role="img" aria-label="Isometric wireframe of Vehicle Zero: deck, battery pack, controller, motor and four wheels">
+              <g class="i-ground" stroke="#4fd1e8" stroke-width=".7" fill="none" opacity=".16">
+                <line x1="198.8" y1="58.8" x2="52.1" y2="143.5"/>
+                <line x1="224.9" y1="73.9" x2="78.2" y2="158.6"/>
+                <line x1="251.1" y1="88.9" x2="104.3" y2="173.7"/>
+                <line x1="277.2" y1="104.0" x2="130.5" y2="188.8"/>
+                <line x1="303.3" y1="119.1" x2="156.6" y2="203.8"/>
+                <line x1="329.5" y1="134.2" x2="182.7" y2="218.9"/>
+                <line x1="355.6" y1="149.3" x2="208.9" y2="234.0"/>
+                <line x1="381.7" y1="164.4" x2="235.0" y2="249.1"/>
+                <line x1="407.9" y1="179.5" x2="261.1" y2="264.2"/>
+                <line x1="198.8" y1="58.8" x2="417.9" y2="185.3"/>
+                <line x1="172.7" y1="73.9" x2="391.8" y2="200.4"/>
+                <line x1="146.5" y1="88.9" x2="365.7" y2="215.5"/>
+                <line x1="120.4" y1="104.0" x2="339.5" y2="230.5"/>
+                <line x1="94.3" y1="119.1" x2="313.4" y2="245.6"/>
+                <line x1="68.1" y1="134.2" x2="287.3" y2="260.7"/>
+              </g>
+              <g fill="#4fd1e8" opacity=".06">
+                <polygon points="212.9,83.1 379.7,179.5 271.2,242.1 104.3,145.8"/>
+              </g>
+              <g class="i-far" stroke="#4fd1e8" fill="none" stroke-width="1" opacity=".3">
+                <path d="M255.1 100.5 L255.0 97.8 L254.6 95.0 L254.0 92.0 L253.2 89.1 L252.1 86.1 L250.9 83.1 L249.4 80.2 L247.8 77.3 L246.0 74.6 L244.0 72.1 L242.0 69.6 L239.8 67.4 L237.6 65.5 L235.3 63.7 L233.0 62.2 L230.7 61.1 L228.4 60.2 L226.2 59.6 L224.0 59.3 L221.9 59.3 L220.0 59.6 L218.2 60.3 L216.6 61.2 L215.1 62.4 L213.8 64.0 L212.8 65.7 L212.0 67.8 L211.4 70.0 L211.0 72.4 L210.9 75.0 L211.0 77.8 L211.4 80.6 L212.0 83.5 L212.8 86.5 L213.8 89.5 L215.1 92.5 L216.6 95.4 L218.2 98.2 L220.0 100.9 L221.9 103.5 L224.0 105.9 L226.2 108.1 L228.4 110.1 L230.7 111.8 L233.0 113.3 L235.3 114.5 L237.6 115.4 L239.8 116.0 L242.0 116.3 L244.0 116.3 L246.0 115.9 L247.8 115.3 L249.4 114.4 L250.9 113.1 L252.1 111.6 L253.2 109.8 L254.0 107.8 L254.6 105.6 L255.0 103.1 L255.1 100.5 Z"/>
+                <path d="M265.2 94.7 L265.0 92.0 L264.7 89.2 L264.1 86.2 L263.2 83.3 L262.2 80.3 L260.9 77.3 L259.5 74.4 L257.8 71.5 L256.0 68.8 L254.1 66.2 L252.0 63.8 L249.9 61.6 L247.6 59.7 L245.4 57.9 L243.0 56.4 L240.7 55.3 L238.4 54.3 L236.2 53.8 L234.0 53.5 L232.0 53.5 L230.0 53.8 L228.2 54.5 L226.6 55.4 L225.2 56.6 L223.9 58.2 L222.8 59.9 L222.0 61.9 L221.4 64.2 L221.0 66.6 L220.9 69.2 L221.0 72.0 L221.4 74.8 L222.0 77.7 L222.8 80.7 L223.9 83.7 L225.2 86.7 L226.6 89.6 L228.2 92.4 L230.0 95.1 L232.0 97.7 L234.0 100.1 L236.2 102.3 L238.4 104.3 L240.7 106.0 L243.0 107.5 L245.4 108.7 L247.6 109.6 L249.9 110.2 L252.0 110.5 L254.1 110.5 L256.0 110.1 L257.8 109.5 L259.5 108.6 L260.9 107.3 L262.2 105.8 L263.2 104.0 L264.1 102.0 L264.7 99.8 L265.0 97.3 L265.2 94.7 Z"/>
+                <path d="M241.0 92.4 L240.9 91.4 L240.8 90.4 L240.6 89.3 L240.3 88.2 L239.9 87.2 L239.4 86.1 L238.9 85.0 L238.3 84.0 L237.7 83.0 L237.0 82.1 L236.2 81.3 L235.4 80.5 L234.6 79.7 L233.8 79.1 L233.0 78.6 L232.2 78.2 L231.3 77.8 L230.5 77.6 L229.8 77.5 L229.0 77.5 L228.3 77.6 L227.7 77.9 L227.1 78.2 L226.5 78.7 L226.1 79.2 L225.7 79.8 L225.4 80.6 L225.2 81.4 L225.1 82.3 L225.0 83.2 L225.1 84.2 L225.2 85.2 L225.4 86.3 L225.7 87.3 L226.1 88.4 L226.5 89.5 L227.1 90.5 L227.7 91.5 L228.3 92.5 L229.0 93.4 L229.8 94.3 L230.5 95.1 L231.3 95.8 L232.2 96.4 L233.0 97.0 L233.8 97.4 L234.6 97.7 L235.4 97.9 L236.2 98.0 L237.0 98.0 L237.7 97.9 L238.3 97.7 L238.9 97.3 L239.4 96.9 L239.9 96.4 L240.3 95.7 L240.6 95.0 L240.8 94.2 L240.9 93.3 L241.0 92.4 Z"/>
+                <path d="M347.6 153.9 L347.5 151.2 L347.1 148.4 L346.5 145.4 L345.7 142.4 L344.6 139.5 L343.4 136.5 L341.9 133.6 L340.3 130.7 L338.5 128.0 L336.5 125.4 L334.5 123.0 L332.3 120.8 L330.1 118.8 L327.8 117.1 L325.5 115.6 L323.2 114.4 L320.9 113.5 L318.6 112.9 L316.5 112.7 L314.4 112.7 L312.5 113.0 L310.7 113.7 L309.0 114.6 L307.6 115.8 L306.3 117.3 L305.3 119.1 L304.4 121.1 L303.8 123.4 L303.5 125.8 L303.3 128.4 L303.5 131.1 L303.8 134.0 L304.4 136.9 L305.3 139.9 L306.3 142.9 L307.6 145.9 L309.0 148.8 L310.7 151.6 L312.5 154.3 L314.4 156.9 L316.5 159.3 L318.6 161.5 L320.9 163.5 L323.2 165.2 L325.5 166.7 L327.8 167.9 L330.1 168.8 L332.3 169.4 L334.5 169.7 L336.5 169.7 L338.5 169.3 L340.3 168.7 L341.9 167.7 L343.4 166.5 L344.6 165.0 L345.7 163.2 L346.5 161.2 L347.1 159.0 L347.5 156.5 L347.6 153.9 Z"/>
+                <path d="M357.6 148.1 L357.5 145.4 L357.1 142.5 L356.5 139.6 L355.7 136.6 L354.7 133.7 L353.4 130.7 L351.9 127.8 L350.3 124.9 L348.5 122.2 L346.6 119.6 L344.5 117.2 L342.3 115.0 L340.1 113.0 L337.8 111.3 L335.5 109.8 L333.2 108.6 L330.9 107.7 L328.7 107.1 L326.5 106.8 L324.5 106.9 L322.5 107.2 L320.7 107.8 L319.1 108.8 L317.6 110.0 L316.4 111.5 L315.3 113.3 L314.5 115.3 L313.9 117.6 L313.5 120.0 L313.4 122.6 L313.5 125.3 L313.9 128.2 L314.5 131.1 L315.3 134.1 L316.4 137.1 L317.6 140.0 L319.1 143.0 L320.7 145.8 L322.5 148.5 L324.5 151.1 L326.5 153.5 L328.7 155.7 L330.9 157.7 L333.2 159.4 L335.5 160.9 L337.8 162.1 L340.1 163.0 L342.3 163.6 L344.5 163.9 L346.6 163.9 L348.5 163.5 L350.3 162.9 L351.9 161.9 L353.4 160.7 L354.7 159.2 L355.7 157.4 L356.5 155.4 L357.1 153.2 L357.5 150.7 L357.6 148.1 Z"/>
+                <path d="M333.4 145.8 L333.4 144.8 L333.2 143.8 L333.0 142.7 L332.7 141.6 L332.4 140.6 L331.9 139.5 L331.4 138.4 L330.8 137.4 L330.1 136.4 L329.4 135.5 L328.7 134.6 L327.9 133.8 L327.1 133.1 L326.3 132.5 L325.5 132.0 L324.6 131.5 L323.8 131.2 L323.0 131.0 L322.2 130.9 L321.5 130.9 L320.8 131.0 L320.1 131.3 L319.5 131.6 L319.0 132.0 L318.6 132.6 L318.2 133.2 L317.9 134.0 L317.7 134.8 L317.5 135.6 L317.5 136.6 L317.5 137.6 L317.7 138.6 L317.9 139.6 L318.2 140.7 L318.6 141.8 L319.0 142.9 L319.5 143.9 L320.1 144.9 L320.8 145.9 L321.5 146.8 L322.2 147.7 L323.0 148.5 L323.8 149.2 L324.6 149.8 L325.5 150.4 L326.3 150.8 L327.1 151.1 L327.9 151.3 L328.7 151.4 L329.4 151.4 L330.1 151.3 L330.8 151.1 L331.4 150.7 L331.9 150.3 L332.4 149.7 L332.7 149.1 L333.0 148.4 L333.2 147.6 L333.4 146.7 L333.4 145.8 Z"/>
+              </g>
+              <g class="i-hidden" stroke="#5b7d95" stroke-width=".9" stroke-dasharray="4 4" fill="none" opacity=".45">
+                <line x1="194.8" y1="56.4" x2="353.6" y2="148.1"/>
+                <line x1="194.8" y1="56.4" x2="118.4" y2="100.5"/>
+                <line x1="194.8" y1="56.4" x2="194.8" y2="48.3"/>
+                <line x1="283.2" y1="122.6" x2="315.4" y2="141.2"/>
+                <line x1="283.2" y1="122.6" x2="247.1" y2="143.5"/>
+                <line x1="283.2" y1="122.6" x2="283.2" y2="99.4"/>
+                <line x1="202.8" y1="64.6" x2="253.1" y2="93.6"/>
+                <line x1="202.8" y1="64.6" x2="146.5" y2="97.1"/>
+                <line x1="202.8" y1="64.6" x2="202.8" y2="46.0"/>
+                <line x1="243.0" y1="82.0" x2="146.5" y2="137.7"/>
+                <line x1="335.5" y1="135.4" x2="239.0" y2="191.1"/>
+              </g>
+              <g class="i-body">
+                <polygon points="118.4,100.5 277.2,192.2 277.2,184.1 118.4,92.4" fill="#4fd1e8" fill-opacity=".05"/>
+                <polygon points="353.6,148.1 277.2,192.2 277.2,184.1 353.6,140.0" fill="#4fd1e8" fill-opacity=".085"/>
+                <polygon points="194.8,48.3 353.6,140.0 277.2,184.1 118.4,92.4"  fill="#4fd1e8" fill-opacity=".13"/>
+                <polygon points="283.2,188.8 297.3,196.9 297.3,176.0 283.2,167.9" fill="#4fd1e8" fill-opacity=".065"/>
+                <polygon points="361.6,159.7 297.3,196.9 297.3,176.0 361.6,138.8" fill="#4fd1e8" fill-opacity=".11"/>
+                <polygon points="347.6,130.7 361.6,138.8 297.3,176.0 283.2,167.9"  fill="#4fd1e8" fill-opacity=".17"/>
+                <polygon points="146.5,97.1 196.8,126.1 196.8,107.5 146.5,78.5" fill="#4fd1e8" fill-opacity=".085"/>
+                <polygon points="253.1,93.6 196.8,126.1 196.8,107.5 253.1,75.0" fill="#4fd1e8" fill-opacity=".14"/>
+                <polygon points="202.8,46.0 253.1,75.0 196.8,107.5 146.5,78.5"  fill="#4fd1e8" fill-opacity=".21"/>
+                <polygon points="212.9,130.7 231.0,141.2 231.0,136.5 212.9,126.1" fill="#4fd1e8" fill-opacity=".065"/>
+                <polygon points="279.2,113.3 231.0,141.2 231.0,136.5 279.2,108.7" fill="#4fd1e8" fill-opacity=".11"/>
+                <polygon points="261.1,98.2 279.2,108.7 231.0,136.5 212.9,126.1"  fill="#4fd1e8" fill-opacity=".17"/>
+                <polygon points="247.1,143.5 279.2,162.1 279.2,138.8 247.1,120.3" fill="#4fd1e8" fill-opacity=".085"/>
+                <polygon points="315.4,141.2 279.2,162.1 279.2,138.8 315.4,118.0" fill="#4fd1e8" fill-opacity=".14"/>
+                <polygon points="283.2,99.4 315.4,118.0 279.2,138.8 247.1,120.3"  fill="#4fd1e8" fill-opacity=".21"/>
+              </g>
+              <g class="i-edge draw" stroke="#4fd1e8" stroke-width="1.35" fill="none" stroke-linejoin="round">
+                <polygon points="194.8,48.3 353.6,140.0 277.2,184.1 118.4,92.4"/>
+                <polygon points="353.6,148.1 277.2,192.2 277.2,184.1 353.6,140.0"/>
+                <polygon points="118.4,100.5 277.2,192.2 277.2,184.1 118.4,92.4"/>
+                <polygon points="347.6,130.7 361.6,138.8 297.3,176.0 283.2,167.9"/>
+                <polygon points="361.6,159.7 297.3,196.9 297.3,176.0 361.6,138.8"/>
+                <polygon points="283.2,188.8 297.3,196.9 297.3,176.0 283.2,167.9"/>
+                <polygon points="202.8,46.0 253.1,75.0 196.8,107.5 146.5,78.5"/>
+                <polygon points="253.1,93.6 196.8,126.1 196.8,107.5 253.1,75.0"/>
+                <polygon points="146.5,97.1 196.8,126.1 196.8,107.5 146.5,78.5"/>
+                <polygon points="261.1,98.2 279.2,108.7 231.0,136.5 212.9,126.1"/>
+                <polygon points="279.2,113.3 231.0,141.2 231.0,136.5 279.2,108.7"/>
+                <polygon points="212.9,130.7 231.0,141.2 231.0,136.5 212.9,126.1"/>
+                <polygon points="283.2,99.4 315.4,118.0 279.2,138.8 247.1,120.3"/>
+                <polygon points="315.4,141.2 279.2,162.1 279.2,138.8 315.4,118.0"/>
+                <polygon points="247.1,143.5 279.2,162.1 279.2,138.8 247.1,120.3"/>
+              </g>
+              <g class="i-rib" stroke="#ffb020" stroke-width="1" fill="none" opacity=".7">
+                <line x1="212.9" y1="51.8" x2="156.6" y2="84.3"/>
+                <line x1="222.9" y1="57.6" x2="166.7" y2="90.1"/>
+                <line x1="233.0" y1="63.4" x2="176.7" y2="95.9"/>
+                <line x1="243.0" y1="69.2" x2="186.8" y2="101.7"/>
+              </g>
+              <g class="i-edge" stroke="#4fd1e8" stroke-width="1.1" fill="none" opacity=".85">
+                <line x1="281.2" y1="142.3" x2="281.2" y2="152.8"/>
+                <line x1="281.2" y1="152.8" x2="287.3" y2="163.2"/>
+              </g>
+              <g class="i-wheel" stroke="#4fd1e8" fill="none" stroke-width="1.5">
+                <line x1="134.5" y1="119.1" x2="124.4" y2="124.9"/>
+                <line x1="178.7" y1="144.7" x2="168.7" y2="150.5"/>
+                <path d="M178.7 144.7 L178.6 141.9 L178.2 139.1 L177.6 136.1 L176.8 133.2 L175.8 130.2 L174.5 127.2 L173.0 124.3 L171.4 121.5 L169.6 118.7 L167.7 116.2 L165.6 113.8 L163.4 111.5 L161.2 109.6 L158.9 107.8 L156.6 106.4 L154.3 105.2 L152.0 104.3 L149.8 103.7 L147.6 103.4 L145.5 103.4 L143.6 103.7 L141.8 104.4 L140.2 105.3 L138.7 106.5 L137.4 108.1 L136.4 109.8 L135.6 111.9 L135.0 114.1 L134.6 116.5 L134.5 119.1 L134.6 121.9 L135.0 124.7 L135.6 127.6 L136.4 130.6 L137.4 133.6 L138.7 136.6 L140.2 139.5 L141.8 142.3 L143.6 145.0 L145.5 147.6 L147.6 150.0 L149.8 152.2 L152.0 154.2 L154.3 155.9 L156.6 157.4 L158.9 158.6 L161.2 159.5 L163.4 160.1 L165.6 160.4 L167.7 160.4 L169.6 160.0 L171.4 159.4 L173.0 158.5 L174.5 157.2 L175.8 155.7 L176.8 153.9 L177.6 151.9 L178.2 149.7 L178.6 147.3 L178.7 144.7 Z" opacity=".45"/>
+                <path d="M168.7 150.5 L168.5 147.7 L168.2 144.9 L167.6 141.9 L166.7 139.0 L165.7 136.0 L164.4 133.0 L163.0 130.1 L161.3 127.3 L159.5 124.5 L157.6 122.0 L155.5 119.6 L153.4 117.4 L151.1 115.4 L148.9 113.6 L146.5 112.2 L144.2 111.0 L142.0 110.1 L139.7 109.5 L137.6 109.2 L135.5 109.2 L133.6 109.5 L131.8 110.2 L130.1 111.1 L128.7 112.4 L127.4 113.9 L126.3 115.6 L125.5 117.7 L124.9 119.9 L124.6 122.3 L124.4 124.9 L124.6 127.7 L124.9 130.5 L125.5 133.4 L126.3 136.4 L127.4 139.4 L128.7 142.4 L130.1 145.3 L131.8 148.1 L133.6 150.8 L135.5 153.4 L137.6 155.8 L139.7 158.0 L142.0 160.0 L144.2 161.7 L146.5 163.2 L148.9 164.4 L151.1 165.3 L153.4 165.9 L155.5 166.2 L157.6 166.2 L159.5 165.9 L161.3 165.2 L163.0 164.3 L164.4 163.0 L165.7 161.5 L166.7 159.7 L167.6 157.7 L168.2 155.5 L168.5 153.1 L168.7 150.5 Z" fill="#071523" fill-opacity=".72"/>
+                <path d="M154.5 142.3 L154.5 141.3 L154.3 140.3 L154.1 139.2 L153.8 138.1 L153.4 137.1 L153.0 136.0 L152.5 135.0 L151.9 133.9 L151.2 133.0 L150.5 132.0 L149.8 131.2 L149.0 130.4 L148.2 129.7 L147.4 129.0 L146.5 128.5 L145.7 128.1 L144.9 127.7 L144.1 127.5 L143.3 127.4 L142.6 127.4 L141.9 127.6 L141.2 127.8 L140.6 128.1 L140.1 128.6 L139.7 129.1 L139.3 129.8 L139.0 130.5 L138.8 131.3 L138.6 132.2 L138.6 133.1 L138.6 134.1 L138.8 135.1 L139.0 136.2 L139.3 137.2 L139.7 138.3 L140.1 139.4 L140.6 140.4 L141.2 141.4 L141.9 142.4 L142.6 143.4 L143.3 144.2 L144.1 145.0 L144.9 145.7 L145.7 146.4 L146.5 146.9 L147.4 147.3 L148.2 147.6 L149.0 147.9 L149.8 148.0 L150.5 147.9 L151.2 147.8 L151.9 147.6 L152.5 147.3 L153.0 146.8 L153.4 146.3 L153.8 145.6 L154.1 144.9 L154.3 144.1 L154.5 143.2 L154.5 142.3 Z" stroke="#ffb020" stroke-width="1.1"/>
+                <path d="M148.5 138.8 L148.5 138.6 L148.5 138.3 L148.4 138.1 L148.4 137.8 L148.3 137.5 L148.2 137.3 L148.0 137.0 L147.9 136.8 L147.7 136.5 L147.5 136.3 L147.4 136.1 L147.2 135.9 L147.0 135.7 L146.8 135.5 L146.5 135.4 L146.3 135.3 L146.1 135.2 L145.9 135.1 L145.7 135.1 L145.6 135.1 L145.4 135.2 L145.2 135.2 L145.1 135.3 L144.9 135.4 L144.8 135.5 L144.7 135.7 L144.7 135.9 L144.6 136.1 L144.6 136.3 L144.6 136.5 L144.6 136.8 L144.6 137.0 L144.7 137.3 L144.7 137.6 L144.8 137.8 L144.9 138.1 L145.1 138.4 L145.2 138.6 L145.4 138.9 L145.6 139.1 L145.7 139.3 L145.9 139.5 L146.1 139.7 L146.3 139.9 L146.5 140.0 L146.8 140.1 L147.0 140.2 L147.2 140.2 L147.4 140.3 L147.5 140.3 L147.7 140.2 L147.9 140.2 L148.0 140.1 L148.2 140.0 L148.3 139.8 L148.4 139.7 L148.4 139.5 L148.5 139.3 L148.5 139.1 L148.5 138.8 Z" stroke="#ffb020" stroke-width="1"/>
+                <line x1="148.5" y1="137.5" x2="153.1" y2="137.1"/>
+                <line x1="144.6" y1="135.3" x2="140.0" y2="129.6"/>
+                <line x1="146.5" y1="140.2" x2="146.5" y2="146.4"/>
+                <line x1="227.0" y1="172.5" x2="216.9" y2="178.3"/>
+                <line x1="271.2" y1="198.0" x2="261.1" y2="203.8"/>
+                <path d="M271.2 198.0 L271.1 195.3 L270.7 192.5 L270.1 189.5 L269.3 186.6 L268.2 183.6 L267.0 180.6 L265.5 177.7 L263.9 174.8 L262.1 172.1 L260.1 169.5 L258.1 167.1 L255.9 164.9 L253.7 163.0 L251.4 161.2 L249.1 159.7 L246.8 158.5 L244.5 157.6 L242.2 157.0 L240.1 156.8 L238.0 156.8 L236.1 157.1 L234.3 157.8 L232.6 158.7 L231.2 159.9 L229.9 161.5 L228.9 163.2 L228.0 165.2 L227.4 167.5 L227.1 169.9 L227.0 172.5 L227.1 175.2 L227.4 178.1 L228.0 181.0 L228.9 184.0 L229.9 187.0 L231.2 190.0 L232.6 192.9 L234.3 195.7 L236.1 198.4 L238.0 201.0 L240.1 203.4 L242.2 205.6 L244.5 207.6 L246.8 209.3 L249.1 210.8 L251.4 212.0 L253.7 212.9 L255.9 213.5 L258.1 213.8 L260.1 213.8 L262.1 213.4 L263.9 212.8 L265.5 211.8 L267.0 210.6 L268.2 209.1 L269.3 207.3 L270.1 205.3 L270.7 203.1 L271.1 200.6 L271.2 198.0 Z" opacity=".45"/>
+                <path d="M261.1 203.8 L261.0 201.1 L260.7 198.3 L260.1 195.3 L259.2 192.4 L258.2 189.4 L256.9 186.4 L255.5 183.5 L253.8 180.6 L252.0 177.9 L250.1 175.3 L248.0 172.9 L245.9 170.7 L243.6 168.8 L241.3 167.0 L239.0 165.5 L236.7 164.3 L234.4 163.4 L232.2 162.8 L230.0 162.6 L228.0 162.6 L226.0 162.9 L224.2 163.6 L222.6 164.5 L221.1 165.7 L219.9 167.3 L218.8 169.0 L218.0 171.0 L217.4 173.3 L217.0 175.7 L216.9 178.3 L217.0 181.0 L217.4 183.9 L218.0 186.8 L218.8 189.8 L219.9 192.8 L221.1 195.8 L222.6 198.7 L224.2 201.5 L226.0 204.2 L228.0 206.8 L230.0 209.2 L232.2 211.4 L234.4 213.4 L236.7 215.1 L239.0 216.6 L241.3 217.8 L243.6 218.7 L245.9 219.3 L248.0 219.6 L250.1 219.6 L252.0 219.2 L253.8 218.6 L255.5 217.7 L256.9 216.4 L258.2 214.9 L259.2 213.1 L260.1 211.1 L260.7 208.9 L261.0 206.4 L261.1 203.8 Z" fill="#071523" fill-opacity=".72"/>
+                <path d="M247.0 195.7 L246.9 194.7 L246.8 193.7 L246.6 192.6 L246.3 191.5 L245.9 190.5 L245.5 189.4 L244.9 188.3 L244.3 187.3 L243.7 186.3 L243.0 185.4 L242.3 184.5 L241.5 183.8 L240.7 183.0 L239.9 182.4 L239.0 181.9 L238.2 181.5 L237.4 181.1 L236.6 180.9 L235.8 180.8 L235.0 180.8 L234.3 180.9 L233.7 181.2 L233.1 181.5 L232.6 182.0 L232.1 182.5 L231.7 183.1 L231.4 183.9 L231.2 184.7 L231.1 185.5 L231.1 186.5 L231.1 187.5 L231.2 188.5 L231.4 189.5 L231.7 190.6 L232.1 191.7 L232.6 192.8 L233.1 193.8 L233.7 194.8 L234.3 195.8 L235.0 196.7 L235.8 197.6 L236.6 198.4 L237.4 199.1 L238.2 199.7 L239.0 200.3 L239.9 200.7 L240.7 201.0 L241.5 201.2 L242.3 201.3 L243.0 201.3 L243.7 201.2 L244.3 201.0 L244.9 200.6 L245.5 200.2 L245.9 199.7 L246.3 199.0 L246.6 198.3 L246.8 197.5 L246.9 196.6 L247.0 195.7 Z" stroke="#ffb020" stroke-width="1.1"/>
+                <path d="M241.0 192.2 L241.0 192.0 L241.0 191.7 L240.9 191.5 L240.8 191.2 L240.7 190.9 L240.6 190.7 L240.5 190.4 L240.4 190.1 L240.2 189.9 L240.0 189.7 L239.8 189.4 L239.6 189.2 L239.4 189.1 L239.2 188.9 L239.0 188.8 L238.8 188.7 L238.6 188.6 L238.4 188.5 L238.2 188.5 L238.0 188.5 L237.9 188.5 L237.7 188.6 L237.5 188.7 L237.4 188.8 L237.3 188.9 L237.2 189.1 L237.1 189.3 L237.1 189.5 L237.0 189.7 L237.0 189.9 L237.0 190.2 L237.1 190.4 L237.1 190.7 L237.2 191.0 L237.3 191.2 L237.4 191.5 L237.5 191.8 L237.7 192.0 L237.9 192.3 L238.0 192.5 L238.2 192.7 L238.4 192.9 L238.6 193.1 L238.8 193.2 L239.0 193.4 L239.2 193.5 L239.4 193.6 L239.6 193.6 L239.8 193.6 L240.0 193.6 L240.2 193.6 L240.4 193.6 L240.5 193.5 L240.6 193.4 L240.7 193.2 L240.8 193.1 L240.9 192.9 L241.0 192.7 L241.0 192.5 L241.0 192.2 Z" stroke="#ffb020" stroke-width="1"/>
+                <line x1="240.9" y1="190.9" x2="245.5" y2="190.5"/>
+                <line x1="237.1" y1="188.7" x2="232.5" y2="183.0"/>
+                <line x1="239.0" y1="193.6" x2="239.0" y2="199.8"/>
+              </g>
+              <g class="i-dim draw" stroke="#ffb020" stroke-width="1" fill="none" opacity=".95">
+                <line x1="126.4" y1="174.8" x2="218.9" y2="228.2"/>
+                <line x1="134.5" y1="170.2" x2="118.4" y2="179.5"/>
+                <line x1="227.0" y1="223.6" x2="210.9" y2="232.9"/>
+              </g>
+              <g stroke="#ffb020" stroke-width=".8" stroke-dasharray="3 3" fill="none" opacity=".45">
+                <line x1="142.5" y1="165.5" x2="129.5" y2="173.1"/>
+                <line x1="235.0" y1="218.9" x2="221.9" y2="226.5"/>
+              </g>
+              <text x="160.6" y="208.5" fill="#ffd074" font-family="IBM Plex Mono, monospace" font-size="9.5" letter-spacing="1.3" text-anchor="middle">WHEELBASE 190</text>
+              <g class="i-lead" stroke="#5b7d95" stroke-width=".9" stroke-dasharray="3 3" fill="none" opacity=".8">
+                <path d="M198.8 76.2 L174.4 42.2 L140.8 42.2"/>
+                <path d="M246.1 117.4 L250.3 51.4 L256.1 51.4"/>
+                <path d="M281.2 119.1 L307.2 93.1 L343.2 93.1"/>
+              </g>
+              <g fill="#4fd1e8">
+                <circle cx="198.8" cy="76.2" r="2.1"/>
+                <circle cx="246.1" cy="117.4" r="2.1"/>
+                <circle cx="281.2" cy="119.1" r="2.1"/>
+              </g>
+              <text x="134.8" y="37.2" fill="#9fbdd2" font-family="IBM Plex Mono, monospace" font-size="9" letter-spacing="1.3" text-anchor="end">7.4 V PACK</text>
+              <text x="262.1" y="46.4" fill="#9fbdd2" font-family="IBM Plex Mono, monospace" font-size="9" letter-spacing="1.3" text-anchor="start">CONTROLLER</text>
+              <text x="349.2" y="88.1" fill="#9fbdd2" font-family="IBM Plex Mono, monospace" font-size="9" letter-spacing="1.3" text-anchor="start">DC MOTOR</text>
+            </svg>
+            </div>
+          </div>
+        </div>
+
+        <div class="schematic-foot">
+          <div><span>Pack</span><strong>7.4 V</strong></div>
+          <div><span>Draw</span><strong>1.30 A</strong></div>
+          <div><span>Track</span><strong>12.5 m</strong></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ===================== STAT STRIP ===================== -->
+<section class="shell">
+  <div class="strip rv">
+    <div><strong>06</strong><span>Activities planned</span></div>
+    <div><strong>01</strong><span>Live right now</span></div>
+    <div><strong>80</strong><span>Minutes per session</span></div>
+    <div><strong>0</strong><span>Installs required</span></div>
+  </div>
+</section>
+
+<!-- ===================== ACTIVITIES ===================== -->
+<section class="sec" id="activities">
+  <div class="shell">
+    <div class="sec-head rv">
+      <div class="eyebrow">Sheet index · 01–06</div>
+      <h2>Pick up an instrument</h2>
+      <p class="lede">
+        Each activity runs in the browser, offline, on any laptop or phone in the room.
+        Nothing to install, nothing to log into. Open it, play it, argue about the answer.
+      </p>
+    </div>
+
+    <div class="cards">
+
+      <!-- ACT-01 : LIVE -->
+      <a class="card amber rv" data-d="1" href="./activities/mission-control/index.html">
+        <div class="card-top">
+          <span class="card-id">ACT-01</span>
+          <span class="badge live">● Live</span>
+        </div>
+        <svg class="card-icon" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.6">
+          <circle cx="24" cy="24" r="19"/>
+          <circle cx="24" cy="24" r="4"/>
+          <path d="M24 5v8M24 35v8M5 24h8M35 24h8"/>
+          <path d="M24 24l11-11"/>
+        </svg>
+        <h3>Mission Control<br>Vehicle Zero</h3>
+        <p>
+          Six rounds of incoming telemetry, each in whatever unit the supplier felt like using.
+          Convert it, compute it, transmit it. The flight computer rejects any number you
+          cannot defend — and tells you <em>why</em>, never the answer.
+        </p>
+        <div class="tags">
+          <span>Unit conversion</span><span>Significant figures</span><span>Timed</span><span>Teams</span>
+        </div>
+        <div class="card-foot">
+          <span>15–20 min</span>
+          <span class="card-go">Launch <span aria-hidden="true">▸</span></span>
+        </div>
+      </a>
+
+      <!-- ACT-02 -->
+      <div class="card locked rv" data-d="2">
+        <div class="card-top">
+          <span class="card-id">ACT-02</span>
+          <span class="badge soon">In build</span>
+        </div>
+        <svg class="card-icon" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.6">
+          <path d="M6 42V6M6 42h36"/>
+          <polyline points="10,34 18,26 26,30 34,14 42,10"/>
+          <circle cx="18" cy="26" r="2.4"/><circle cx="26" cy="30" r="2.4"/><circle cx="34" cy="14" r="2.4"/>
+        </svg>
+        <h3>Track Lab<br>Motion Data</h3>
+        <p>
+          Run the vehicle, time it, and turn a messy column of stopwatch readings into a
+          distance–time plot that actually says something. Spreadsheet work, done properly.
+        </p>
+        <div class="tags"><span>Plotting</span><span>Spreadsheets</span><span>Averages</span></div>
+        <div class="card-foot"><span>Session 2</span><span>Coming soon</span></div>
+      </div>
+
+      <!-- ACT-03 -->
+      <div class="card locked rv" data-d="3">
+        <div class="card-top">
+          <span class="card-id">ACT-03</span>
+          <span class="badge soon">In build</span>
+        </div>
+        <svg class="card-icon" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.6">
+          <path d="M6 24h8l4-10 6 20 5-14 4 4h9"/>
+          <rect x="3" y="12" width="42" height="24" rx="1"/>
+        </svg>
+        <h3>Power Bench<br>Circuit Budget</h3>
+        <p>
+          Voltage, current, power, energy — and the question every team gets wrong the first
+          time: how long will this pack actually last on the track?
+        </p>
+        <div class="tags"><span>P = V·I</span><span>Energy</span><span>Estimation</span></div>
+        <div class="card-foot"><span>Session 3</span><span>Coming soon</span></div>
+      </div>
+
+      <!-- ACT-04 -->
+      <div class="card locked rv" data-d="4">
+        <div class="card-top">
+          <span class="card-id">ACT-04</span>
+          <span class="badge draft">Draft</span>
+        </div>
+        <svg class="card-icon" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.6">
+          <path d="M24 5l19 33H5z"/>
+          <path d="M24 19v10M24 33v.5"/>
+        </svg>
+        <h3>Error Hunt<br>Uncertainty</h3>
+        <p>
+          Every measurement is wrong by some amount. The engineering skill is knowing by how
+          much — and refusing to report digits you never measured.
+        </p>
+        <div class="tags"><span>Uncertainty</span><span>Propagation</span><span>Tolerance</span></div>
+        <div class="card-foot"><span>Session 4</span><span>Planned</span></div>
+      </div>
+
+      <!-- ACT-05 -->
+      <div class="card locked rv" data-d="5">
+        <div class="card-top">
+          <span class="card-id">ACT-05</span>
+          <span class="badge draft">Draft</span>
+        </div>
+        <svg class="card-icon" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.6">
+          <path d="M5 38C15 38 17 10 27 10s12 20 16 20"/>
+          <circle cx="14" cy="30" r="2.2"/><circle cx="27" cy="10" r="2.2"/><circle cx="38" cy="24" r="2.2"/>
+        </svg>
+        <h3>Curve Fit<br>Points to Prediction</h3>
+        <p>
+          Fit a line to your own track data, then use it to predict a run you have not made
+          yet. Then go make it and see how badly you were off.
+        </p>
+        <div class="tags"><span>Linear models</span><span>Slope</span><span>Prediction</span></div>
+        <div class="card-foot"><span>Session 5</span><span>Planned</span></div>
+      </div>
+
+      <!-- ACT-06 -->
+      <div class="card locked rv" data-d="6">
+        <div class="card-top">
+          <span class="card-id">ACT-06</span>
+          <span class="badge draft">Draft</span>
+        </div>
+        <svg class="card-icon" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.6">
+          <rect x="8" y="4" width="32" height="40" rx="1"/>
+          <path d="M15 15h18M15 23h18M15 31h11"/>
+        </svg>
+        <h3>Design Review<br>Final Telemetry</h3>
+        <p>
+          Present your prototype's numbers to the room. Other teams get to challenge any
+          figure you cannot justify. Practice for every engineering meeting you will ever sit in.
+        </p>
+        <div class="tags"><span>Interpretation</span><span>Reporting</span><span>Defence</span></div>
+        <div class="card-foot"><span>Session 6</span><span>Planned</span></div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ===================== CHALLENGE TEASER ===================== -->
+<section class="sec">
+  <div class="shell">
+    <div class="panel rv">
+      <span class="corner tl"></span><span class="corner tr"></span>
+      <span class="corner bl"></span><span class="corner br"></span>
+      <div class="two-col">
+        <div>
+          <div class="eyebrow amber">The challenge</div>
+          <h2 style="margin:16px 0 18px">Design and evaluate<br>a mini electric vehicle</h2>
+          <p class="lede">
+            Across the block your team designs, builds and tests a battery-powered scale vehicle
+            that has to travel a straight track. This module supplies the tools that make the
+            testing mean something: units, precision, measurement, data, interpretation.
+          </p>
+          <div class="hero-actions" style="margin-top:26px">
+            <a class="btn" href="./challenge.html">Read the brief <span class="arw">▸</span></a>
+          </div>
+        </div>
+        <div class="prose">
+          <h3>What this module contributes</h3>
+          <ul>
+            <li>Applying basic mathematical tools to a physical problem you can hold in your hands.</li>
+            <li>Using computational tools to manipulate and visualise your own experimental data.</li>
+            <li>Interpreting results — not just producing them — as part of the solution.</li>
+          </ul>
+          <div class="callout">
+            <div class="tiny">Rule of the room</div>
+            <p>A number without a unit is not an answer. A number with more digits than you measured is a lie with decimals on it.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== ROADMAP PREVIEW ===================== -->
+<section class="sec">
+  <div class="shell">
+    <div class="sec-head rv">
+      <div class="eyebrow">Where this is going</div>
+      <h2>Six sessions, one vehicle</h2>
+    </div>
+    <div class="two-col">
+      <div class="tl rv">
+        <div class="tl-item">
+          <div class="tiny">Session 01 · Live</div>
+          <h4>Units, precision and the cost of getting them wrong</h4>
+          <p>Mission Control. Six rounds of telemetry, two attempts each, one Mars orbiter lost to a unit error.</p>
+        </div>
+        <div class="tl-item">
+          <div class="tiny">Session 02</div>
+          <h4>Measuring the vehicle for real</h4>
+          <p>Stopwatch, tape, multimeter. Raw data collection and the first honest look at scatter.</p>
+        </div>
+        <div class="tl-item">
+          <div class="tiny">Session 03</div>
+          <h4>The power budget</h4>
+          <p>Electrical behaviour of the drivetrain. What the pack promises versus what the track takes.</p>
+        </div>
+      </div>
+      <div class="tl rv" data-d="2">
+        <div class="tl-item">
+          <div class="tiny">Session 04</div>
+          <h4>Uncertainty, and admitting it</h4>
+          <p>How wrong is your measurement, and how does that error travel through a calculation?</p>
+        </div>
+        <div class="tl-item">
+          <div class="tiny">Session 05</div>
+          <h4>From data to a model</h4>
+          <p>Fit, plot, predict. Then run the vehicle again and check whether the model earned its keep.</p>
+        </div>
+        <div class="tl-item">
+          <div class="tiny">Session 06</div>
+          <h4>Defend the numbers</h4>
+          <p>Final telemetry review. Every figure on your slide is fair game for the rest of the room.</p>
+        </div>
+      </div>
+    </div>
+    <div class="hero-actions rv" style="margin-top:34px">
+      <a class="btn ghost" href="./roadmap.html">Full roadmap <span class="arw">▸</span></a>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<!-- ===================== FOOTER ===================== -->
+<footer class="foot">
+  <div class="foot-grid">
+    <div>
+      <span>Drawing title</span>
+      <strong>Fundamental Tools<br>in Engineering</strong>
+      <p style="margin-top:10px">Module 3 · Innovative Perspectives in Engineering · First semester</p>
+    </div>
+    <div>
+      <span>Sheet</span>
+      <strong>01 / 06</strong>
+      <p style="margin-top:10px">Activities index</p>
+    </div>
+    <div>
+      <span>Scale</span>
+      <strong>1 : 1</strong>
+      <p style="margin-top:10px">Runs offline in-browser</p>
+    </div>
+    <div>
+      <span>Navigate</span>
+      <a href="./index.html">Activities</a>
+      <a href="./challenge.html">Challenge brief</a>
+      <a href="./roadmap.html">Session roadmap</a>
+      <a href="./resources.html">Resources</a>
+    </div>
+  </div>
+  <div class="foot-bar">
+    <span>MA1003B · Semestral Ago–Dic <span data-year>2026</span></span>
+    <span>Built for the classroom · No accounts · No tracking</span>
+  </div>
+</footer>
+
+<script src="./assets/app.js"></script>
+</body>
+</html>
