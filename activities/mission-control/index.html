@@ -193,6 +193,28 @@
   color: var(--ink); margin: 0 0 20px;
 }
 
+/* ---------- formula strip ----------
+   Deliberately NOT uppercased: in these relations, case carries meaning
+   (D = diameter, d = distance; t = time, T would be temperature).       */
+.formula {
+  display: flex; align-items: center; flex-wrap: wrap; gap: 16px;
+  font-family: var(--mono); font-size: 15px; font-weight: 500;
+  text-transform: none; letter-spacing: .03em;
+  color: var(--cyan-hot);
+  background: var(--paper-deep);
+  border: 1px solid var(--line-hard); border-left: 2px solid var(--cyan);
+  padding: 13px 18px; margin: -4px 0 20px;
+}
+.formula .lbl {
+  font-size: 9.5px; letter-spacing: .24em; text-transform: uppercase;
+  color: var(--ink-faint);
+  border-right: 1px solid var(--line-hard); padding-right: 16px;
+}
+@media (max-width: 560px) {
+  .formula { font-size: 13.5px; gap: 10px; }
+  .formula .lbl { border-right: 0; padding-right: 0; width: 100%; }
+}
+
 /* ---------- feedback ---------- */
 .feedback {
   display: none; margin-top: 18px; padding: 16px 20px;
@@ -354,7 +376,8 @@ const ROUNDS = [
   {
     code:"T-04  POWER BUDGET",
     telemetry:[["BATTERY VOLTAGE","7.4 V"],["MOTOR CURRENT","1.30 A"]],
-    question:"How much electrical power is the motor drawing?  (P = V · I)",
+    question:"How much electrical power is the motor drawing?",
+    formula:"P = V · I",
     answer:9.6, unit:"W", sf:2,
     units:["W","kW","J","V"],
     why:"7.4 × 1.30 = 9.62. The 7.4 V has only 2 significant figures, so the answer gets 2: 9.6 W."
@@ -362,18 +385,20 @@ const ROUNDS = [
   {
     code:"T-03  ENERGY DRAW",
     telemetry:[["MOTOR POWER","9.6 W"],["RUN TIME","3.4 s"]],
-    question:"How much energy did the run consume?  (E = P · t)",
+    question:"How much energy did the run consume?",
+    formula:"E = P · t",
     answer:33, unit:"J", sf:2,
     units:["J","kJ","W","W·h"],
     why:"9.6 × 3.4 = 32.64. Both factors have 2 significant figures, so the answer does too: 33 J."
   },
   {
     code:"T-02  DRIVETRAIN",
-    telemetry:[["WHEEL DIAMETER","65 mm"],["TRACK LENGTH","12.5 m"]],
-    question:"How many full revolutions does a wheel make over the track?",
+    telemetry:[["WHEEL DIAMETER","65 mm"],["TRACK LENGTH","12.5 m"],["ROLLING CONDITION","no slip"]],
+    question:"How many revolutions does a wheel make over the track?",
+    formula:"C = π · D   (D = wheel diameter)     →     n = d / C   (d = track length)",
     answer:61, unit:"rev", sf:2,
     units:["rev","m","mm","rad"],
-    why:"Circumference = π × 0.065 m = 0.2042 m. Then 12.5 / 0.2042 = 61.2. The 65 mm has 2 significant figures, so: 61 revolutions."
+    why:"Circumference uses the diameter, not the radius: C = π × 0.065 m = 0.2042 m. Then 12.5 / 0.2042 = 61.2. The 65 mm carries only 2 significant figures, so: 61 rev."
   },
   {
     code:"T-01  FINAL BURN",
@@ -444,6 +469,7 @@ function screenRound(){
         <div class="line">${teleLines}</div>
       </div>
       <div class="qtext">${esc(r.question)}</div>
+      ${r.formula ? `<div class="formula"><span class="lbl">Relations</span>${esc(r.formula)}</div>` : ""}
       <div class="row" style="align-items:center">
         <input type="text" id="ans" placeholder="value" autocomplete="off">
         <select id="unit">${opts}</select>
