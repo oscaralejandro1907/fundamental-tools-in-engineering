@@ -336,6 +336,10 @@
 .tl-expired b{ color:var(--red); }
 .clock.over{ color:var(--red) !important; }
 .tl-over{ font-family:var(--mono); font-size:12px; color:var(--red); margin-left:8px; }
+.field input[readonly]{
+  color:var(--amber); border-color:var(--amber); background:rgba(255,176,32,.10);
+  cursor:default; letter-spacing:.10em;
+}
 /* @@MOTION-END@@ */</style>
 </head>
 <body>
@@ -545,7 +549,7 @@
   <div class="lock-body">
     <p class="brief">Unit 07's outbound route was <b>eight legs</b>. At shift change the log was split across
     the fleet: <b>your team holds exactly one leg, and no team holds more than one.</b> Enter your team number
-    to decrypt yours.</p>
+    to decrypt yours. <b>You get one leg and one only</b> — the device locks to whichever team you confirm.</p>
     <div class="entry">
       <div class="field"><label for="claim">Your team</label>
         <input id="claim" type="text" class="wide" autocomplete="off" placeholder="Team ?"></div>
@@ -557,8 +561,8 @@
     <div class="tablewrap"><table id="legtable">
       <thead><tr><th>Leg</th><th>Held by</th><th>x (km)</th><th>y (km)</th></tr></thead>
       <tbody></tbody></table></div>
-    <p class="note">Decrypting a leg that is not yours costs <b>60 seconds</b> — and buys you nothing. Eight
-    legs read out at the board take under two minutes; stealing them one at a time would cost you eight.</p>
+    <p class="note">One decrypt per device, and it cannot be changed — so read your team number off the board
+    before you press it. The other seven legs reach you across the room, not through this screen.</p>
     <div class="entry">
       <div class="field"><label for="l5rmag">|R| of class total km · whole number</label><input id="l5rmag" type="text" autocomplete="off"></div>
       <div class="field"><label for="l5rth">direction ° · whole number</label><input id="l5rth" type="text" autocomplete="off"></div>
@@ -838,10 +842,12 @@ function drawRoute(){
     "font-size":12.5,class:"lbl"});t1.textContent="depot (0,0)";
   const t2=add("text",{x:X(last[0])+11,y:Y(last[1])-9,fill:"#F2A93B",
     "font-family":"IBM Plex Mono, monospace","font-size":12.5,class:"lbl"});t2.textContent="unit 07 (−12, 16)";
-  add("rect",{x:14,y:14,width:196,height:52,fill:"#16202C",stroke:"#2E3F52","stroke-width":1,rx:3});
-  const t3=add("text",{x:26,y:36,fill:"#F2A93B","font-family":"IBM Plex Mono, monospace",
+  /* legend sits top-right: the route runs bottom-right to top-left, so that corner is clear */
+  const lx=W-210;
+  add("rect",{x:lx,y:14,width:196,height:52,fill:"#16202C",stroke:"#2E3F52","stroke-width":1,rx:3});
+  const t3=add("text",{x:lx+12,y:36,fill:"#F2A93B","font-family":"IBM Plex Mono, monospace",
     "font-size":13,"font-weight":600,class:"lbl"});t3.textContent="R = 20 km @ 127\u00B0";
-  const t4=add("text",{x:26,y:55,fill:"#8FA3B8","font-family":"IBM Plex Mono, monospace",
+  const t4=add("text",{x:lx+12,y:55,fill:"#8FA3B8","font-family":"IBM Plex Mono, monospace",
     "font-size":11.5,class:"lbl"});t4.textContent="8 legs \u00B7 59.9 km driven";
 }
 
@@ -858,7 +864,7 @@ function renderLegs(shown){
   }
 }
 renderLegs([]);
-const claimedTeams=new Set();
+let pendingTeam=null, lockedTeam=null;
 
 /* ---- events ---- */
 $("#begin").addEventListener("click",()=>{
@@ -883,19 +889,29 @@ document.querySelectorAll("[data-hint]").forEach(b=>b.addEventListener("click",(
 document.querySelectorAll("input").forEach(i=>i.addEventListener("keydown",e=>{
   if(e.key==="Enter"){const sec=i.closest(".lock");if(sec)submit(sec.id);}}));
 $("#claimbtn").addEventListener("click",()=>{
-  const m=$("#claim").value.match(/[1-8]/);
-  if(!m){ say("l5","err","Enter your team number — a single digit from 1 to 8."); return; }
+  if(lockedTeam!==null) return;                       /* already committed: nothing more opens */
+  const inp=$("#claim"), btn=$("#claimbtn");
+  const m=inp.value.match(/[1-8]/);
+  if(!m){ pendingTeam=null; btn.textContent="Decrypt";
+          say("l5","err","Enter your team number — a single digit from 1 to 8."); return; }
   const t=Number(m[0]);
-  if(claimedTeams.has(t)){ renderLegs([...claimedTeams]); return; }
-  const first=claimedTeams.size===0;
-  claimedTeams.add(t); renderLegs([...claimedTeams]);
-  if(first){
-    say("l5","tip","Team "+t+" · leg L"+t+" decrypted: ( "+LEGS[t][0]+" , "+LEGS[t][1]+
-      " ) km. Read those two numbers out when your team is called.");
-  } else {
-    if(started) penalty(60,"hint");
-    say("l5","err","Leg L"+t+" is another team's · −60 s. You only need your own — the board does the rest.");
+
+  if(pendingTeam!==t){                                /* first press: ask them to confirm */
+    pendingTeam=t; btn.textContent="Confirm Team "+t;
+    say("l5","tip","Lock this device to Team "+t+"? Press again to confirm. You get one leg, and it cannot be changed afterwards — check the board first.");
+    return;
   }
+
+  lockedTeam=t;                                        /* second press: commit, for good */
+  renderLegs([t]);
+  inp.value="Team "+t; inp.readOnly=true; inp.setAttribute("aria-readonly","true");
+  btn.disabled=true; btn.textContent="Locked";
+  say("l5","tip","Team "+t+" · leg L"+t+" = ( "+LEGS[t][0]+" , "+LEGS[t][1]+
+    " ) km. This device is locked to Team "+t+". Read those two numbers out when your team is called.");
+});
+$("#claim").addEventListener("input",()=>{             /* changing the number cancels a pending confirm */
+  if(lockedTeam!==null) return;
+  pendingTeam=null; $("#claimbtn").textContent="Decrypt";
 });
 $("#passbtn").addEventListener("click",()=>{
   if($("#pass").value.trim().toUpperCase()==="MA1003B"){
