@@ -1,242 +1,166 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>ACT-07 · Telemetry Lockout — Vectors in 2D</title>
-<meta name="description" content="Five locks, forty-five minutes. Read the fleet in i, j notation, convert it, operate on it, and find the leg that is going nowhere. The dispatch server refuses any number you cannot defend.">
-<meta name="theme-color" content="#071523">
+<title>Telemetry Lockout</title>
+<style>html{color-scheme:dark}body{margin:0;font:14px system-ui,sans-serif}img{max-width:100%}[hidden]{display:none!important}</style>
+</head>
+<body>
+<title>Telemetry Lockout</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="../../assets/style.css">
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%23071523'/%3E%3Crect x='7' y='7' width='18' height='18' fill='none' stroke='%234fd1e8' stroke-width='2' transform='rotate(45 16 16)'/%3E%3Crect x='13' y='13' width='6' height='6' fill='%23ffb020'/%3E%3C/svg%3E">
-
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
 <style>
-/* ============================================================
-   ACT-07 — TELEMETRY LOCKOUT
-   Blueprint dialect. Everything scoped to #app; the four class
-   names that clash with the site sheet carry a tl- prefix.
-   ============================================================ */
-.tl-wrap { max-width: 860px; margin: 0 auto; padding: 30px 0 90px; }
+:root{
+  --ground:#0D1520; --panel:#16202C; --raise:#1E2A38; --line:#2E3F52;
+  --ink:#E8EFF6; --muted:#8FA3B8; --dim:#63788D;
+  --amber:#F2A93B; --amber-soft:#3A2C13;
+  --green:#45C08A; --green-soft:#12301F;
+  --red:#E0625A; --red-soft:#37191A;
+  --cyan:#5AC8E8;
+  --mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+  --sans:"IBM Plex Sans",system-ui,-apple-system,Segoe UI,sans-serif;
+  --cond:"Barlow Condensed","Arial Narrow",system-ui,sans-serif;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--ground);color:var(--ink);font-family:var(--sans);font-size:15px;line-height:1.55;
+  -webkit-text-size-adjust:100%}
+.wrap{max-width:760px;margin:0 auto;padding:0 18px 80px}
 
-.tl-strip {
-  display: flex; align-items: center; justify-content: space-between;
-  flex-wrap: wrap; gap: 14px;
-  padding-bottom: 18px; margin-bottom: 26px;
-  border-bottom: 1px solid var(--line-hard);
-}
-.tl-back {
-  font-family: var(--mono); font-size: 10.5px; letter-spacing: .18em;
-  text-transform: uppercase; color: var(--ink-faint);
-  display: inline-flex; align-items: center; gap: 9px;
-  transition: color .25s, gap .3s var(--ease);
-}
-.tl-back:hover { color: var(--cyan); gap: 14px; }
-
-#app { position: relative; z-index: 5; }
-#app {
-  --tl-soft-amber: rgba(255,176,32,.13);
-  --tl-soft-green: rgba(82,227,164,.12);
-  --tl-soft-red:   rgba(255,95,86,.13);
-}
-
-/* ---------- floating shift clock ---------- */
-.tl-dock {
-  position: fixed; z-index: 55;
-  pointer-events: none;            /* read-only display: must never block a control beneath it */
-  right: clamp(12px, 3vw, 26px); bottom: clamp(12px, 3vw, 26px);
-  display: flex; align-items: center; gap: 14px;
-  padding: 10px 16px;
-  background: rgba(6,18,30,.93);
-  border: 1px solid var(--line-hard);
-  backdrop-filter: blur(10px);
-}
-.tl-dock .rail { display: flex; gap: 4px; }
-.tl-dock .pip { width: 20px; height: 4px; background: var(--line-hard); }
-.tl-dock .pip.on { background: var(--amber); }
-.tl-dock .pip.done { background: var(--green); }
-.tl-dock .clock {
-  font-family: var(--mono); font-weight: 600; font-size: 20px;
-  font-variant-numeric: tabular-nums; color: var(--amber);
-  min-width: 76px; text-align: right;
-}
-.tl-dock .clock.warn { color: var(--red); }
-.tl-dock .clock.idle { color: var(--ink-faint); }
-@media (max-width: 560px) {
-  .tl-dock { left: 12px; right: 12px; justify-content: space-between; }
-}
+/* ---------- status bar ---------- */
+.bar{position:sticky;top:0;z-index:30;background:rgba(13,21,32,.94);backdrop-filter:blur(8px);
+  border-bottom:1px solid var(--line)}
+.bar-in{position:relative;max-width:760px;margin:0 auto;padding:9px 18px;display:flex;align-items:center;gap:14px}
+.mark{font-family:var(--cond);font-weight:700;font-size:19px;letter-spacing:.11em;text-transform:uppercase;
+  color:var(--ink);white-space:nowrap}
+.mark span{color:var(--amber)}
+.rail{display:flex;gap:5px;margin-left:auto}
+.pip{width:22px;height:5px;border-radius:1px;background:var(--line)}
+.pip.on{background:var(--amber)}
+.pip.done{background:var(--green)}
+.clock{font-family:var(--mono);font-weight:600;font-size:19px;font-variant-numeric:tabular-nums;
+  color:var(--amber);min-width:74px;text-align:right}
+.clock.warn{color:var(--red)}
+.clock.idle{color:var(--dim)}
 
 /* ---------- masthead ---------- */
-#app .head { padding: 0 0 8px; margin-bottom: 26px; }
-#app .tl-eyebrow {
-  font-family: var(--mono); font-size: 11px; letter-spacing: .2em;
-  text-transform: uppercase; color: var(--ink-faint);
-  display: flex; flex-wrap: wrap; gap: 6px 16px; margin-bottom: 16px;
-}
-#app h1 {
-  font-family: var(--display); font-weight: 800;
-  font-size: clamp(42px, 9vw, 74px); line-height: .92; letter-spacing: .01em;
-  text-transform: uppercase; margin: 0 0 16px; text-wrap: balance;
-}
-#app h1 em { font-style: normal; color: var(--amber); display: block; }
-#app .tl-lede { color: var(--ink-soft); max-width: 62ch; margin: 0 0 20px; font-size: 16px; }
-#app .tl-lede strong { color: var(--ink); font-weight: 600; }
-#app .terms { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 26px; }
-#app .term {
-  font-family: var(--mono); font-size: 11.5px; padding: 6px 11px;
-  border: 1px solid var(--line-coarse); color: var(--ink-soft);
-  background: var(--paper-raised);
-}
-#app .term b { color: var(--amber); font-weight: 500; }
-#app .begin {
-  font-family: var(--display); font-weight: 800; font-size: 23px;
-  letter-spacing: .12em; text-transform: uppercase;
-  background: var(--amber); color: var(--paper-deep);
-  border: 0; padding: 13px 32px; cursor: pointer; transition: filter .2s;
-}
-#app .begin:hover { filter: brightness(1.12); }
-#app .begin:disabled { background: var(--line-hard); color: var(--ink-faint); cursor: default; }
+.head{padding:34px 0 8px;border-bottom:1px solid var(--line);margin-bottom:26px}
+.eyebrow{font-family:var(--mono);font-size:11.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--dim);
+  display:flex;flex-wrap:wrap;gap:6px 14px;margin-bottom:14px}
+h1{font-family:var(--cond);font-weight:700;font-size:clamp(40px,9vw,66px);line-height:.95;letter-spacing:.005em;
+  text-transform:uppercase;margin:0 0 14px;text-wrap:balance}
+h1 em{font-style:normal;color:var(--amber);display:block}
+.lede{color:var(--muted);max-width:60ch;margin:0 0 18px}
+.lede strong{color:var(--ink);font-weight:600}
+.terms{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:26px}
+.term{font-family:var(--mono);font-size:12px;padding:5px 10px;border:1px solid var(--line);border-radius:3px;
+  color:var(--muted);background:var(--panel)}
+.term b{color:var(--amber);font-weight:500}
+.begin{font-family:var(--cond);font-weight:700;font-size:22px;letter-spacing:.1em;text-transform:uppercase;
+  background:var(--amber);color:#160E00;border:0;border-radius:3px;padding:13px 30px;cursor:pointer;
+  transition:filter .15s}
+.begin:hover{filter:brightness(1.12)}
+.begin:disabled{background:var(--line);color:var(--dim);cursor:default}
 
-/* ---------- lock panels ---------- */
-#app .lock {
-  position: relative;
-  border: 1px solid var(--line-coarse); border-left: 3px solid var(--line-hard);
-  background: var(--paper-raised); margin-bottom: 14px; overflow: hidden;
-}
-#app .lock::before {
-  content: ''; position: absolute; inset: 0; pointer-events: none;
-  background-image:
-    linear-gradient(to right, var(--line-fine) 1px, transparent 1px),
-    linear-gradient(to bottom, var(--line-fine) 1px, transparent 1px);
-  background-size: 24px 24px;
-}
-#app .lock > *:not(.tl-rail):not(.tl-sweep):not(.tl-alarm) { position: relative; }
-#app .lock.active { border-left-color: var(--amber); }
-#app .lock.cleared { border-left-color: var(--green); }
-#app .lock-head { display: flex; align-items: baseline; gap: 13px; padding: 16px 20px; }
-#app .lock-no { font-family: var(--mono); font-size: 12px; color: var(--ink-faint); letter-spacing: .1em; }
-#app .lock-name {
-  font-family: var(--display); font-weight: 700; font-size: 27px;
-  letter-spacing: .05em; text-transform: uppercase; line-height: 1;
-}
-#app .lock.sealed .lock-name { color: var(--ink-faint); }
-#app .state {
-  margin-left: auto; font-family: var(--mono); font-size: 10px;
-  letter-spacing: .16em; text-transform: uppercase; padding: 4px 9px; white-space: nowrap;
-}
-#app .state.sealed { color: var(--ink-faint); border: 1px solid var(--line-coarse); }
-#app .state.active { color: var(--amber); border: 1px solid var(--amber); background: var(--tl-soft-amber); }
-#app .state.cleared { color: var(--green); border: 1px solid var(--green); background: var(--tl-soft-green); }
-#app .lock-body { padding: 0 20px 22px; display: flex; flex-direction: column; gap: 17px; }
-#app .lock.cleared .lock-body, #app .lock.sealed .lock-body { display: none; }
-#app .brief { color: var(--ink-soft); margin: 0; max-width: 64ch; }
-#app .brief b { color: var(--ink); font-weight: 600; }
-#app .vec { font-weight: 700; font-style: italic; }
+/* ---------- lock bands ---------- */
+.lock{border:1px solid var(--line);border-left:4px solid var(--line);border-radius:3px;background:var(--panel);
+  margin-bottom:14px;overflow:hidden}
+.lock.active{border-left-color:var(--amber);background:var(--raise)}
+.lock.cleared{border-left-color:var(--green)}
+.lock-head{display:flex;align-items:baseline;gap:12px;padding:15px 18px;cursor:default}
+.lock-no{font-family:var(--mono);font-size:12px;color:var(--dim);letter-spacing:.08em}
+.lock-name{font-family:var(--cond);font-weight:600;font-size:25px;letter-spacing:.07em;text-transform:uppercase;
+  line-height:1}
+.lock.sealed .lock-name{color:var(--dim)}
+.state{margin-left:auto;font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;
+  padding:3px 8px;border-radius:2px;white-space:nowrap}
+.state.sealed{color:var(--dim);border:1px solid var(--line)}
+.state.active{color:var(--amber);border:1px solid var(--amber);background:var(--amber-soft)}
+.state.cleared{color:var(--green);border:1px solid var(--green);background:var(--green-soft)}
+.lock-body{padding:0 18px 20px;display:flex;flex-direction:column;gap:16px}
+.brief{color:var(--muted);margin:0;max-width:62ch}
+.brief b{color:var(--ink);font-weight:600}
 
 /* ---------- data ---------- */
-#app .tablewrap { overflow-x: auto; border: 1px solid var(--line-coarse); background: rgba(4,16,28,.55); }
-#app table {
-  border-collapse: collapse; width: 100%; font-family: var(--mono);
-  font-size: 13.5px; font-variant-numeric: tabular-nums; white-space: nowrap;
-}
-#app th {
-  text-align: left; font-weight: 500; font-size: 10.5px; letter-spacing: .16em;
-  text-transform: uppercase; color: var(--ink-faint);
-  padding: 10px 15px; border-bottom: 1px solid var(--line-coarse);
-}
-#app td { padding: 9px 15px; border-bottom: 1px solid var(--line-fine); color: var(--ink); }
-#app tr:last-child td { border-bottom: 0; }
-#app .ij { color: var(--amber); }
-#app .redact { color: var(--ink-faint); letter-spacing: .1em; }
-#app .note {
-  font-family: var(--mono); font-size: 12.5px; color: var(--ink-faint);
-  border-left: 2px solid var(--line-hard); padding: 3px 0 3px 13px; margin: 0; max-width: 62ch;
-}
-#app .note b { color: var(--amber); font-weight: 500; }
-#app .formula {
-  font-family: var(--mono); font-size: 14.5px; background: rgba(4,16,28,.6);
-  border: 1px solid var(--line-coarse); padding: 13px 16px;
-  overflow-x: auto; white-space: nowrap; color: var(--ink);
-}
+.tablewrap{overflow-x:auto;border:1px solid var(--line);border-radius:3px;background:var(--panel)}
+table{border-collapse:collapse;width:100%;font-family:var(--mono);font-size:13.5px;
+  font-variant-numeric:tabular-nums;white-space:nowrap}
+th{text-align:left;font-weight:500;font-size:11px;letter-spacing:.13em;text-transform:uppercase;color:var(--dim);
+  padding:9px 14px;border-bottom:1px solid var(--line)}
+td{padding:8px 14px;border-bottom:1px solid rgba(46,63,82,.5);color:var(--ink)}
+tr:last-child td{border-bottom:0}
+.ij{color:var(--amber)}
+.vec{font-weight:700;font-style:italic}
+.redact{color:var(--dim);letter-spacing:.1em}
+.note{font-family:var(--mono);font-size:12.5px;color:var(--dim);border-left:2px solid var(--line);
+  padding:2px 0 2px 12px;margin:0;max-width:60ch}
+.note b{color:var(--amber);font-weight:500}
+.formula{font-family:var(--mono);font-size:14px;background:var(--panel);border:1px solid var(--line);
+  border-radius:3px;padding:11px 14px;overflow-x:auto;white-space:nowrap;color:var(--ink)}
 
 /* ---------- entry ---------- */
-#app .entry { display: flex; flex-wrap: wrap; gap: 13px; align-items: flex-end; }
-#app .field { display: flex; flex-direction: column; gap: 6px; }
-#app .field label {
-  font-family: var(--mono); font-size: 10.5px; letter-spacing: .13em;
-  text-transform: uppercase; color: var(--ink-soft);
-}
-#app .field input {
-  font-family: var(--mono); font-weight: 500; font-size: 17px; width: 9.5ch;
-  padding: 10px; background: var(--paper-deep); color: var(--ink);
-  border: 1px solid var(--line-hard); text-align: center;
-}
-#app .field input.wide { width: 15ch; letter-spacing: .18em; }
-#app .field input:focus { outline: 2px solid var(--cyan); outline-offset: 1px; border-color: var(--cyan); }
-#app .field input.bad { border-color: var(--red); background: var(--tl-soft-red); }
-#app .field input.good { border-color: var(--green); background: var(--tl-soft-green); }
-#app .tl-btn {
-  font-family: var(--display); font-weight: 700; font-size: 19px; letter-spacing: .1em;
-  text-transform: uppercase; padding: 11px 22px; cursor: pointer;
-  border: 1px solid var(--amber); background: var(--amber); color: var(--paper-deep);
-  transition: filter .2s;
-}
-#app .tl-btn:hover { filter: brightness(1.12); }
-#app .tl-btn.tl-ghost { background: transparent; color: var(--ink-soft); border-color: var(--line-hard); }
-#app .tl-btn.tl-ghost:hover { color: var(--cyan); border-color: var(--cyan); filter: none; }
-#app .msg { font-family: var(--mono); font-size: 13px; padding: 11px 14px; display: none; max-width: 66ch; }
-#app .msg.show { display: block; }
-#app .msg.err { color: #ffc8c3; background: var(--tl-soft-red); border: 1px solid rgba(255,95,86,.45); }
-#app .msg.tip { color: var(--amber-hot); background: var(--tl-soft-amber); border: 1px solid rgba(255,176,32,.45); }
-#app .shake { animation: tlsh .32s; }
-@keyframes tlsh { 25% { transform: translateX(-5px); } 75% { transform: translateX(5px); } }
-@media (prefers-reduced-motion: reduce) { #app .shake { animation: none; } }
+.entry{display:flex;flex-wrap:wrap;gap:12px;align-items:flex-end}
+.field{display:flex;flex-direction:column;gap:5px}
+.field label{font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.field input{font-family:var(--mono);font-weight:500;font-size:17px;width:9.5ch;padding:9px 10px;
+  background:var(--ground);color:var(--ink);border:1px solid var(--line);border-radius:3px;text-align:center}
+.field input.wide{width:15ch;letter-spacing:.18em}
+.field input:focus{outline:2px solid var(--amber);outline-offset:1px;border-color:var(--amber)}
+.field input.bad{border-color:var(--red);background:var(--red-soft)}
+.field input.good{border-color:var(--green);background:var(--green-soft)}
+.btn{font-family:var(--cond);font-weight:600;font-size:18px;letter-spacing:.09em;text-transform:uppercase;
+  padding:10px 20px;border-radius:3px;cursor:pointer;border:1px solid var(--amber);background:var(--amber);
+  color:#160E00}
+.btn:hover{filter:brightness(1.12)}
+.btn.ghost{background:transparent;color:var(--muted);border-color:var(--line)}
+.btn.ghost:hover{color:var(--amber);border-color:var(--amber);filter:none}
+.msg{font-family:var(--mono);font-size:13px;padding:10px 13px;border-radius:3px;display:none;max-width:64ch}
+.msg.show{display:block}
+.msg.err{color:#FFC8C3;background:var(--red-soft);border:1px solid #5C2B28}
+.msg.tip{color:#FFE0AE;background:var(--amber-soft);border:1px solid #5C4419}
+.shake{animation:sh .32s}
+@keyframes sh{25%{transform:translateX(-5px)}75%{transform:translateX(5px)}}
+@media (prefers-reduced-motion:reduce){.shake{animation:none}}
 
 /* ---------- cleared payoff ---------- */
-#app .payoff { padding: 0 20px 20px; display: none; }
-#app .lock.cleared .payoff { display: block; }
-#app .payoff p { margin: 0; color: var(--ink-soft); border-left: 2px solid var(--green); padding-left: 14px; max-width: 64ch; }
-#app .payoff b { color: var(--ink); font-weight: 600; }
+.payoff{padding:0 18px 18px;display:none}
+.lock.cleared .payoff{display:block}
+.payoff p{margin:0;color:var(--muted);border-left:2px solid var(--green);padding-left:13px;max-width:62ch}
+.payoff b{color:var(--ink);font-weight:600}
+.lock.cleared .lock-body{display:none}
+.lock.sealed .lock-body{display:none}
 
 /* ---------- endgame ---------- */
-#app .end { display: none; border: 1px solid var(--green); background: var(--paper-raised); padding: 28px 22px; margin-top: 24px; }
-#app .end.show { display: block; }
-#app .end h2 {
-  font-family: var(--display); font-weight: 800; font-size: 42px; letter-spacing: .04em;
-  text-transform: uppercase; margin: 0 0 8px; color: var(--green); line-height: 1;
-}
-#app .stats {
-  display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
-  gap: 1px; background: var(--line-coarse); border: 1px solid var(--line-coarse); margin: 22px 0;
-}
-#app .stat { background: var(--paper-raised); padding: 14px 16px; }
-#app .stat dt {
-  font-family: var(--mono); font-size: 10px; letter-spacing: .15em;
-  text-transform: uppercase; color: var(--ink-faint); margin-bottom: 5px;
-}
-#app .stat dd { font-family: var(--mono); font-weight: 600; font-size: 22px; margin: 0; font-variant-numeric: tabular-nums; }
-#app #routeplot { width: 100%; height: auto; display: block; border: 1px solid var(--line-coarse); background: var(--paper-deep); }
+.end{display:none;border:1px solid var(--green);border-radius:3px;background:var(--panel);padding:26px 20px;
+  margin-top:22px}
+.end.show{display:block}
+.end h2{font-family:var(--cond);font-weight:700;font-size:38px;letter-spacing:.06em;text-transform:uppercase;
+  margin:0 0 6px;color:var(--green);line-height:1}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(128px,1fr));gap:1px;background:var(--line);
+  border:1px solid var(--line);border-radius:3px;margin:20px 0}
+.stat{background:var(--panel);padding:13px 15px}
+.stat dt{font-family:var(--mono);font-size:10.5px;letter-spacing:.13em;text-transform:uppercase;color:var(--dim);
+  margin-bottom:4px}
+.stat dd{font-family:var(--mono);font-weight:600;font-size:22px;margin:0;font-variant-numeric:tabular-nums}
+.end .brief{margin:0 0 14px}
+.end .brief:last-child{margin-bottom:0}
+#routeplot{width:100%;height:auto;display:block;border:1px solid var(--line);border-radius:3px;background:var(--ground)}
 
-/* ---------- instructor control ---------- */
-#app .control { margin-top: 46px; border-top: 1px solid var(--line-hard); padding-top: 18px; }
-#app .control summary {
-  font-family: var(--mono); font-size: 11px; letter-spacing: .16em;
-  text-transform: uppercase; color: var(--ink-faint); cursor: pointer; list-style: none;
-}
-#app .control summary::-webkit-details-marker { display: none; }
-#app .control summary:hover { color: var(--cyan); }
-#app .ctrl-body { margin-top: 18px; display: none; }
-#app .ctrl-body.open { display: block; }
-#app .board { display: grid; grid-template-columns: repeat(auto-fit, minmax(155px, 1fr)); gap: 11px; margin: 15px 0; }
-#app .board .field input { width: 100%; }
-#app .total {
-  font-family: var(--mono); font-size: 17px; padding: 13px 16px;
-  border: 1px solid var(--amber); background: var(--tl-soft-amber); color: var(--ink);
-}
-#app h3 {
-  font-family: var(--display); font-weight: 700; font-size: 21px; letter-spacing: .06em;
-  text-transform: uppercase; margin: 24px 0 9px; color: var(--cyan);
-}
+/* ---------- control ---------- */
+.control{margin-top:44px;border-top:1px solid var(--line);padding-top:16px}
+.control summary{font-family:var(--mono);font-size:11.5px;letter-spacing:.13em;text-transform:uppercase;
+  color:var(--dim);cursor:pointer;list-style:none}
+.control summary::-webkit-details-marker{display:none}
+.control summary:hover{color:var(--amber)}
+.ctrl-body{margin-top:16px;display:none}
+.ctrl-body.open{display:block}
+.board{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin:14px 0}
+.board .field input{width:100%}
+.total{font-family:var(--mono);font-size:17px;padding:12px 15px;border:1px solid var(--amber);border-radius:3px;
+  background:var(--amber-soft);color:var(--ink)}
+h3{font-family:var(--cond);font-weight:600;font-size:20px;letter-spacing:.07em;text-transform:uppercase;
+  margin:22px 0 8px;color:var(--amber)}
 
 /* @@MOTION-START@@ — shared by the standalone build and the site build.
    Selectors carry no #app prefix so the same block works in both. */
@@ -326,51 +250,21 @@
   #routeplot .lbl{ opacity:1 !important; }
   .tl-amb{ display:none; }
 }
-/* @@MOTION-END@@ */</style>
-</head>
-<body>
+/* @@MOTION-END@@ */
+</style>
 
-<div class="substrate" aria-hidden="true"></div>
-<div class="grain" aria-hidden="true"></div>
-<div class="crosshair" aria-hidden="true"><span></span></div>
-
-<!-- ===================== NAV ===================== -->
-<nav class="nav">
-  <div class="nav-in">
-    <a class="brand" href="../../index.html">
-      <span class="brand-mark" aria-hidden="true"></span>
-      <span class="brand-txt">
-        <b>Drafting Table</b>
-        <small>MA1003B · Fundamental Tools</small>
-      </span>
-    </a>
-    <button class="nav-toggle" aria-expanded="false">[ MENU ]</button>
-    <ul class="nav-links">
-      <li><a href="../../index.html">Activities</a></li>
-      <li><a href="../../challenge.html">Challenge</a></li>
-      <li><a href="../../roadmap.html">Roadmap</a></li>
-      <li><a href="../../resources.html">Resources</a></li>
-    </ul>
-  </div>
-</nav>
-
-<main class="shell tl-wrap">
-  <div class="tl-strip">
-    <div class="eyebrow amber">ACT-07 · Session 07 · Vector escape room</div>
-    <a class="tl-back" href="../../index.html"><span aria-hidden="true">◂</span> Back to activities</a>
-  </div>
-
-  <div id="app">
-<div class="tl-dock" id="tl-dock">
+<div class="bar"><div class="bar-in">
+  <div class="mark">Teclivery <span>Dispatch</span></div>
   <div class="rail" id="rail"></div>
   <div class="clock idle" id="clock">45:00</div>
-</div>
+</div></div>
+
 <div class="wrap">
 
 <header class="head">
-  <div class="tl-eyebrow"><span>Terminal 04</span><span>Shift-change fault 0x1J</span><span>MA1003B · Session 7</span></div>
+  <div class="eyebrow"><span>Terminal 04</span><span>Shift-change fault 0x1J</span><span>MA1003B · Session 7</span></div>
   <h1>Telemetry<em>Lockout</em></h1>
-  <p class="tl-lede">Unit 07 is stranded on the ring road with a cold-chain load on board. The routing server
+  <p class="lede">Unit 07 is stranded on the ring road with a cold-chain load on board. The routing server
   locked itself at shift change and will not reopen until <strong>five telemetry checks</strong> clear.
   Everything you need is already in tonight's log — it is just written in î and ĵ.</p>
   <div class="terms">
@@ -405,8 +299,8 @@
     <div class="entry">
       <div class="field"><label for="l1code">Quadrant string</label>
         <input id="l1code" class="wide" type="text" autocomplete="off" maxlength="5" placeholder="•••••"></div>
-      <button class="tl-btn" data-submit="l1">Transmit</button>
-      <button class="tl-btn tl-ghost" data-hint="l1">Hint −60s</button>
+      <button class="btn" data-submit="l1">Transmit</button>
+      <button class="btn ghost" data-hint="l1">Hint −60s</button>
     </div>
     <div class="msg" id="m-l1"></div>
   </div>
@@ -436,8 +330,8 @@
       <div class="field"><label for="l2ax">Ax (m)</label><input id="l2ax" type="text" autocomplete="off"></div>
       <div class="field"><label for="l2bx">Bx (m)</label><input id="l2bx" type="text" autocomplete="off"></div>
       <div class="field"><label for="l2thd">Direction of D (°)</label><input id="l2thd" type="text" autocomplete="off"></div>
-      <button class="tl-btn" data-submit="l2">Transmit</button>
-      <button class="tl-btn tl-ghost" data-hint="l2">Hint −60s</button>
+      <button class="btn" data-submit="l2">Transmit</button>
+      <button class="btn ghost" data-hint="l2">Hint −60s</button>
     </div>
     <div class="msg" id="m-l2"></div>
   </div>
@@ -466,8 +360,8 @@
       <div class="field"><label for="l3th">its direction °</label><input id="l3th" type="text" autocomplete="off"></div>
     </div>
     <div class="entry">
-      <button class="tl-btn" data-submit="l3">Transmit</button>
-      <button class="tl-btn tl-ghost" data-hint="l3">Hint −60s</button>
+      <button class="btn" data-submit="l3">Transmit</button>
+      <button class="btn ghost" data-hint="l3">Hint −60s</button>
     </div>
     <p class="note">On paper as well, not entered here: <b><span class="vec">u</span> − <span class="vec">v</span></b>; check that
     <span class="vec">u</span> + (−<span class="vec">u</span>) = 0; and settle whether <b>|3<span class="vec">u</span>| = 3|<span class="vec">u</span>|</b>.</p>
@@ -511,8 +405,8 @@
     <div class="entry">
       <div class="field"><label for="l4neg">Legs against the lane</label><input id="l4neg" type="text" autocomplete="off"></div>
       <div class="field"><label for="l4perp">Leg exactly across it</label><input id="l4perp" type="text" autocomplete="off" placeholder="P?"></div>
-      <button class="tl-btn" data-submit="l4">Transmit</button>
-      <button class="tl-btn tl-ghost" data-hint="l4">Hint −60s</button>
+      <button class="btn" data-submit="l4">Transmit</button>
+      <button class="btn ghost" data-hint="l4">Hint −60s</button>
     </div>
     <div class="msg" id="m-l4"></div>
   </div>
@@ -535,7 +429,7 @@
     <div class="entry">
       <div class="field"><label for="claim">Your assigned legs</label>
         <input id="claim" type="text" class="wide" autocomplete="off" placeholder="e.g. 3,4"></div>
-      <button class="tl-btn tl-ghost" id="claimbtn">Decrypt</button>
+      <button class="btn ghost" id="claimbtn">Decrypt</button>
     </div>
     <div class="tablewrap"><table id="legtable">
       <thead><tr><th>Leg</th><th>x (km)</th><th>y (km)</th></tr></thead><tbody></tbody></table></div>
@@ -544,8 +438,8 @@
     <div class="entry">
       <div class="field"><label for="l5rmag">|R| of class total (km)</label><input id="l5rmag" type="text" autocomplete="off"></div>
       <div class="field"><label for="l5rth">its direction °</label><input id="l5rth" type="text" autocomplete="off"></div>
-      <button class="tl-btn" data-submit="l5">Transmit</button>
-      <button class="tl-btn tl-ghost" data-hint="l5">Hint −60s</button>
+      <button class="btn" data-submit="l5">Transmit</button>
+      <button class="btn ghost" data-hint="l5">Hint −60s</button>
     </div>
     <div class="msg" id="m-l5"></div>
   </div>
@@ -581,7 +475,7 @@
   <div id="ctrl-gate">
     <div class="entry" style="margin-top:12px">
       <div class="field"><label for="pass">Passcode</label><input id="pass" type="password" class="wide" autocomplete="off"></div>
-      <button class="tl-btn tl-ghost" id="passbtn">Unlock</button>
+      <button class="btn ghost" id="passbtn">Unlock</button>
     </div>
   </div>
   <div class="ctrl-body" id="ctrl-body">
@@ -602,24 +496,14 @@
       </tbody></table></div>
     <h3>Clock</h3>
     <div class="entry">
-      <button class="tl-btn tl-ghost" id="add5">+5 min</button>
-      <button class="tl-btn tl-ghost" id="pause">Pause</button>
+      <button class="btn ghost" id="add5">+5 min</button>
+      <button class="btn ghost" id="pause">Pause</button>
     </div>
   </div>
 </details>
 
 </div>
-  </div>
-</main>
 
-<footer class="foot">
-  <div class="foot-bar">
-    <span>ACT-07 · Telemetry Lockout · Vectors in 2D</span>
-    <span>Runs offline · Nothing uploaded · Nothing saved</span>
-  </div>
-</footer>
-
-<script src="../../assets/app.js"></script>
 <script>
 const A = {"l1": [{"key": "code", "ok": [629126723], "bad": {"4257489661": "Five units are listed, not four — and one of them is not in any quadrant.", "2408654095": "Four digits, five units. Check Unit 41 again: which quadrant contains a vector that points straight down the axis?", "3178927453": "Unit 41 is (0î − 200ĵ). Its x-component is exactly zero, so it sits ON the axis, not inside a quadrant.", "2910191359": "Unit 41 is (0î − 200ĵ). Its x-component is exactly zero, so it sits ON the axis, not inside a quadrant.", "3133498241": "Check Unit 24: x is positive, y is negative. Count counter-clockwise from quadrant I."}}], "l2": [{"key": "ax", "ok": [1882448583], "bad": {"2229355059": "You used sine where cosine belongs. The x-component is the side ADJACENT to the 25° angle.", "2212577440": "You used sine where cosine belongs. The x-component is the side ADJACENT to the 25° angle.", "1472213591": "Right value, wrong format — round to the nearest whole metre.", "3686896098": "Right value, wrong format — round to the nearest whole metre.", "1865670964": "Close. Round 108.76 to the nearest whole metre, don't truncate it.", "1933075630": "That is the magnitude, not the component. Ax = |A| cos θ.", "2350930344": "25° is in quadrant I. Both components are positive.", "1949706154": "Your calculator is in radian mode. cos(25 rad) is not cos(25°)."}}, {"key": "bx", "ok": [3704863021], "bad": {"417916660": "Magnitude is right, sign is not. 140° is past 90° — which way does î point there?", "2296465535": "You used sine where cosine belongs, and you lost the sign as well.", "1288738790": "You used sine where cosine belongs. Bx = 85 cos 140°.", "2040330635": "Right value, wrong format — round to the nearest whole metre.", "3688085402": "Close. 85 cos 140° = −65.11, which rounds to −65.", "2365694582": "That is the magnitude, not the component."}}, {"key": "thd", "ok": [1915312273, 2176733588, 3852110309], "bad": {"1254889362": "That is what your calculator said, and it is the classic trap. arctan can only answer between −90° and +90°. Look at the signs of D and decide which quadrant it is actually in.", "3580612148": "That is what your calculator said, and it is the classic trap. arctan only ever answers between −90° and +90°. Which quadrant is (−40, +30) really in?", "2331006511": "You dropped the calculator's minus sign. That is not the fix — the fix is a quadrant correction.", "1011574233": "You added 360° to −37°. But 323° is in quadrant IV, and D is not. Add 180°, not 360°.", "2262910297": "You divided the wrong way round. tan θ = opposite/adjacent = Dy/Dx.", "3169127873": "Check your arithmetic: −36.87° + 180° is not 217°.", "2212577440": "That is the magnitude of D, not its direction."}}], "l3": [{"key": "rx", "ok": [365759422], "bad": {"923577301": "Sign lost. 3 + (−5) is negative.", "1024243015": "That is u − v. Read the operation again.", "197983232": "Check the signs: 3 + (−5)."}}, {"key": "ry", "ok": [856466825], "bad": {"923577301": "That is u − v. Read the operation again.", "432869898": "Both y-components are positive: 4 + 2."}}, {"key": "tx", "ok": [485174231], "bad": {"873244444": "vx is −5, so 6 − (−5) = 6 + 5. Subtracting a negative adds. (Adding instead of subtracting also gives 1.)", "1024243015": "That is u − v — you subtracted before doubling. 2u = (6, 8), so the x-component is 6 − (−5).", "434841374": "You doubled after subtracting. The expression is 2u − v, not 2(u − v).", "3636913902": "6 − (−5) is positive."}}, {"key": "ty", "ok": [856466825], "bad": {"923577301": "That is u − v — you subtracted before doubling. 2uy = 8, so it is 8 − 2.", "468396612": "You added instead of subtracting: 8 + 2. The operation is 2u − v.", "1024243015": "You stopped at 2uy. Now subtract vy = 2.", "822911587": "You doubled after subtracting. The expression is 2u − v, not 2(u − v)."}}, {"key": "mag", "ok": [3329033328, 4251938786, 2728245407, 3345810947, 2772922446], "bad": {"3035552618": "You added the magnitudes: |u| + |v|. That is exactly the mistake the whole class made in session six. Add the COMPONENTS first, then take the magnitude of the result.", "3052330237": "You added the magnitudes instead of the components.", "2313390249": "You forgot the square root. |R| = √(Rx² + Ry²).", "856466825": "Close, but that is only Ry. The magnitude uses both components.", "1024243015": "Check: √((−2)² + 6²), and remember (−2)² is positive."}}, {"key": "th", "ok": [1865670964, 3754006574, 1522693543], "bad": {"3755342973": "arctan again. It answered −71.57°, which is quadrant IV. Rx is negative and Ry is positive — which quadrant is that?", "2053387058": "arctan answered in quadrant IV. Rx < 0 and Ry > 0, so apply the correction.", "2380647820": "You dropped the minus instead of correcting the quadrant.", "1006345213": "You added 360°. That lands in quadrant IV. The correction here is 180°.", "334175660": "You divided the wrong way round. tan θ = Ry/Rx.", "4180585028": "Check the arithmetic: −71.57° + 180°."}}], "l4": [{"key": "d1", "ok": [890022063], "bad": {"873244444": "They are both unit vectors, but they point along different axes. Write them as components: (1,0)·(0,1).", "923577301": "Use A·B = AxBx + AyBy on (1,0) and (0,1)."}}, {"key": "d2", "ok": [518729469], "bad": {"2297598368": "That is (2+3)². Multiply component by matching component, then add.", "806133968": "That is the sum of the components, not the dot product.", "856466825": "Multiply x by x and y by y, then add: 2·2 + 3·3.", "2606311045": "The dot product is a number, not a magnitude."}}, {"key": "d3", "ok": [890022063], "bad": {"2381486463": "You multiplied the magnitudes. Use components: (4,0)·(0,5) = 4·0 + 0·5.", "1007465396": "Check each product: 4·0 and 0·5."}}, {"key": "d4", "ok": [890022063], "bad": {"2314375987": "You dropped a sign. 3·(−4) is negative; 4·3 is positive. Now add them.", "3687393854": "Only one of the two products is negative. 3·(−4) = −12 and 4·3 = +12.", "3620136283": "That is only the first product. Add the second one.", "501951850": "That is only the second product. Add the first one, and mind its sign."}}, {"key": "neg", "ok": [839689206], "bad": {"822911587": "That is how many legs had a POSITIVE dot product — those are the ones making progress.", "1024243015": "You counted the perpendicular leg as negative. Zero is neither.", "806133968": "Recount — check every leg, including the ones with two negative components.", "856466825": "Recount. A leg counts as negative when 4x + 3y is below zero, not when x is.", "485174231": "You counted every leg that is not clearly positive. Zero is its own case."}}, {"key": "perp", "ok": [1007465396], "bad": {"873244444": "P1 has the largest dot product, not a zero one. Perpendicular means the products cancel exactly.", "501951850": "Check P12 again: 4(−2) + 3(−1).", "906799682": "Check P3 again: 4(2) + 3(−6)."}}], "l5": [{"key": "rmag", "ok": [2381486463], "bad": {"2855274715": "You forgot the square root.", "2328634418": "That is the distance driven along the whole route, not the displacement from the depot. Session six, all over again.", "367583803": "That is roughly the distance driven, not the straight-line displacement.", "2515707415": "You added the leg magnitudes instead of the components.", "501951850": "That is only Rx. The magnitude uses both components.", "434841374": "That is only Ry. The magnitude uses both components."}}, {"key": "rth", "ok": [1983408487, 3795432687, 178522645], "bad": {"1322294028": "arctan, one last time. Rx is negative and Ry is positive — quadrant II. Add the 180°.", "3885744594": "arctan answered in quadrant IV. The class total is in quadrant II.", "2262910297": "You dropped the minus rather than correcting the quadrant.", "1078978899": "You added 360°, which lands in quadrant IV. The correction is 180°.", "2331006511": "You divided the wrong way round. tan θ = Ry/Rx.", "686437619": "Check the arithmetic: −53.13° + 180°."}}]};
 const PATH = [[0, 0], [5, 3], [-2, 7], [0, 1], [-9, 9], [-3, 11], [-7, 6], [-15, 13], [-12, 16]];
@@ -862,5 +746,6 @@ $("#pause").addEventListener("click",()=>{paused=!paused;$("#pause").textContent
 
 openLock(0);paint();arm(false);
 </script>
+
 </body>
 </html>
