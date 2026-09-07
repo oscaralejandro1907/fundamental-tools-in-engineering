@@ -250,6 +250,16 @@ h3{font-family:var(--cond);font-weight:600;font-size:20px;letter-spacing:.07em;t
   #routeplot .lbl{ opacity:1 !important; }
   .tl-amb{ display:none; }
 }
+
+.tl-expired{
+  display:none; margin:0 0 18px; padding:14px 18px;
+  border:1px solid var(--red); border-left:3px solid var(--red);
+  background:rgba(255,95,86,.10); font-family:var(--mono); font-size:13.5px; color:var(--ink);
+}
+.tl-expired.show{ display:block; animation:tl-rise .5s cubic-bezier(.22,1,.36,1) both; }
+.tl-expired b{ color:var(--red); }
+.clock.over{ color:var(--red) !important; }
+.tl-over{ font-family:var(--mono); font-size:12px; color:var(--red); margin-left:8px; }
 /* @@MOTION-END@@ */
 </style>
 
@@ -276,6 +286,11 @@ h3{font-family:var(--cond);font-weight:600;font-size:20px;letter-spacing:.07em;t
   </div>
   <button class="begin" id="begin">Begin shift</button>
 </header>
+
+<div class="tl-expired" id="expired">
+  <b>SHIFT ENDED — the depot stayed shut.</b> Dispatch has authorised overtime: the locks still open and
+  your work still counts, but the clock is now counting <b>against</b> you. Keep going.
+</div>
 
 <!-- ============ LOCK 1 ============ -->
 <section class="lock sealed" id="l1">
@@ -327,9 +342,9 @@ h3{font-family:var(--cond);font-weight:600;font-size:20px;letter-spacing:.07em;t
     <p class="note">Round A and B to the <b>nearest whole metre</b>, signs included. Give D's direction as a whole
     number of degrees between <b>0 and 360</b>.</p>
     <div class="entry">
-      <div class="field"><label for="l2ax">Ax (m)</label><input id="l2ax" type="text" autocomplete="off"></div>
-      <div class="field"><label for="l2bx">Bx (m)</label><input id="l2bx" type="text" autocomplete="off"></div>
-      <div class="field"><label for="l2thd">Direction of D (°)</label><input id="l2thd" type="text" autocomplete="off"></div>
+      <div class="field"><label for="l2ax">Ax m · whole number</label><input id="l2ax" type="text" autocomplete="off"></div>
+      <div class="field"><label for="l2bx">Bx m · whole number</label><input id="l2bx" type="text" autocomplete="off"></div>
+      <div class="field"><label for="l2thd">Direction of D ° · whole number</label><input id="l2thd" type="text" autocomplete="off"></div>
       <button class="btn" data-submit="l2">Transmit</button>
       <button class="btn ghost" data-hint="l2">Hint −60s</button>
     </div>
@@ -356,8 +371,8 @@ h3{font-family:var(--cond);font-weight:600;font-size:20px;letter-spacing:.07em;t
       <div class="field"><label for="l3ry">(u+v) y</label><input id="l3ry" type="text" autocomplete="off"></div>
       <div class="field"><label for="l3tx">(2u−v) x</label><input id="l3tx" type="text" autocomplete="off"></div>
       <div class="field"><label for="l3ty">(2u−v) y</label><input id="l3ty" type="text" autocomplete="off"></div>
-      <div class="field"><label for="l3mag">|u+v| km, 2 dp</label><input id="l3mag" type="text" autocomplete="off"></div>
-      <div class="field"><label for="l3th">its direction °</label><input id="l3th" type="text" autocomplete="off"></div>
+      <div class="field"><label for="l3mag">|u+v| km · 2 decimals</label><input id="l3mag" type="text" autocomplete="off"></div>
+      <div class="field"><label for="l3th">direction ° · whole number</label><input id="l3th" type="text" autocomplete="off"></div>
     </div>
     <div class="entry">
       <button class="btn" data-submit="l3">Transmit</button>
@@ -422,22 +437,25 @@ h3{font-family:var(--cond);font-weight:600;font-size:20px;letter-spacing:.07em;t
   <div class="lock-head"><span class="lock-no">05</span><span class="lock-name">The route</span>
     <span class="state sealed">Sealed</span></div>
   <div class="lock-body">
-    <p class="brief">Unit 07's outbound route was eight legs long, and the log was split across the fleet at
-    shift change. <b>No team holds all eight.</b> Claim the legs your instructor assigned you, sum them into a
-    partial, and put that partial on the board. The class total is the sum of every team's partial — then convert
-    it and the depot reopens.</p>
+    <p class="brief">Unit 07's outbound route was <b>eight legs</b>. At shift change the log was split across
+    the fleet: <b>your team holds exactly one leg, and no team holds more than one.</b> Enter your team number
+    to decrypt yours.</p>
     <div class="entry">
-      <div class="field"><label for="claim">Your assigned legs</label>
-        <input id="claim" type="text" class="wide" autocomplete="off" placeholder="e.g. 3,4"></div>
+      <div class="field"><label for="claim">Your team</label>
+        <input id="claim" type="text" class="wide" autocomplete="off" placeholder="Team ?"></div>
       <button class="btn ghost" id="claimbtn">Decrypt</button>
     </div>
+    <p class="brief">When your instructor calls your team, <b>read your leg's x and y out loud.</b> The class
+    board on the projector adds all eight legs together. Once it shows the class total, convert that total into
+    a magnitude and a direction — that is the exit code.</p>
     <div class="tablewrap"><table id="legtable">
-      <thead><tr><th>Leg</th><th>x (km)</th><th>y (km)</th></tr></thead><tbody></tbody></table></div>
-    <p class="note">Claiming legs you were not assigned costs <b>60 seconds</b> — and it does not save you any,
-    because the board is where the totals meet anyway.</p>
+      <thead><tr><th>Leg</th><th>Held by</th><th>x (km)</th><th>y (km)</th></tr></thead>
+      <tbody></tbody></table></div>
+    <p class="note">Decrypting a leg that is not yours costs <b>60 seconds</b> — and buys you nothing. Eight
+    legs read out at the board take under two minutes; stealing them one at a time would cost you eight.</p>
     <div class="entry">
-      <div class="field"><label for="l5rmag">|R| of class total (km)</label><input id="l5rmag" type="text" autocomplete="off"></div>
-      <div class="field"><label for="l5rth">its direction °</label><input id="l5rth" type="text" autocomplete="off"></div>
+      <div class="field"><label for="l5rmag">|R| of class total km · whole number</label><input id="l5rmag" type="text" autocomplete="off"></div>
+      <div class="field"><label for="l5rth">direction ° · whole number</label><input id="l5rth" type="text" autocomplete="off"></div>
       <button class="btn" data-submit="l5">Transmit</button>
       <button class="btn ghost" data-hint="l5">Hint −60s</button>
     </div>
@@ -518,6 +536,7 @@ const HINTS = {
 };
 
 let started=false, paused=false, remain=45*60, rejects=0, idx=0, timer=null;
+let expired=false, over=0, otimer=null;
 const $ = s => document.querySelector(s);
 const clock = $("#clock");
 const app = document.getElementById("app") || document.body;
@@ -531,8 +550,34 @@ function arm(on){
 
 function fmt(t){t=Math.max(0,Math.round(t));const m=Math.floor(t/60),s=t%60;
   return String(m).padStart(2,"0")+":"+String(s).padStart(2,"0");}
-function paint(){clock.textContent=fmt(remain);
-  clock.classList.toggle("warn",started&&remain<=300);clock.classList.toggle("idle",!started);}
+function paint(){
+  clock.textContent = expired ? "00:00" : fmt(remain);
+  clock.classList.toggle("warn", started && !expired && remain<=300);
+  clock.classList.toggle("idle", !started);
+  clock.classList.toggle("over", expired);
+  let o=document.getElementById("overlabel");
+  if(expired){
+    if(!o){ o=document.createElement("span"); o.id="overlabel"; o.className="tl-over";
+            clock.parentNode.insertBefore(o, clock.nextSibling); }
+    o.textContent="+"+fmt(over);
+  } else if(o){ o.remove(); }
+}
+
+function expire(){
+  if(expired) return;
+  expired=true; clearInterval(timer); timer=null;
+  $("#expired").classList.add("show");
+  paint();
+  otimer=setInterval(()=>{ if(!paused){ over++; paint(); } },1000);
+}
+
+function unexpire(){
+  if(!expired) return;
+  expired=false; clearInterval(otimer); otimer=null;
+  $("#expired").classList.remove("show");
+  timer=setInterval(()=>{if(!paused){remain--;paint();if(remain<=0)expire();}},1000);
+  paint();
+}
 function penalty(sec,kind){
   remain=Math.max(0,remain-sec);paint();
   const dock=$("#tl-dock")||document.querySelector(".bar-in"); if(!dock) return;
@@ -607,7 +652,8 @@ function submit(lock){
 
 function finish(){
   clearInterval(timer);
-  const used=45*60-remain;
+  const used = expired ? 45*60 : 45*60-remain;
+  clearInterval(otimer); otimer=null;
   arm(false);
   const h=$("#end").querySelector("h2");
   h.innerHTML=h.textContent.split("").map((c,i)=>
@@ -615,10 +661,17 @@ function finish(){
   $("#end").classList.add("show");
   drawRoute();
   const reduced=matchMedia("(prefers-reduced-motion: reduce)").matches;
-  if(reduced){ $("#s-time").textContent=fmt(used); $("#s-rej").textContent=rejects; }
+  const label = v => fmt(v) + (expired ? " +"+fmt(over) : "");
+  if(reduced){ $("#s-time").textContent=label(used); $("#s-rej").textContent=rejects; }
   else {
-    countTo($("#s-time"), used, v=>fmt(v), 1100);
+    countTo($("#s-time"), used, label, 1100);
     countTo($("#s-rej"), rejects, v=>String(v), 900);
+  }
+  if(expired){
+    const h=$("#end").querySelector("h2");
+    h.insertAdjacentHTML("afterend",
+      '<p class="brief" style="color:var(--red);margin:0 0 10px">Reopened in overtime — '+fmt(over)+
+      ' past the shift. The route was still recovered.</p>');
   }
   $("#end").scrollIntoView({behavior:"smooth",block:"start"});
 }
@@ -677,18 +730,19 @@ function drawRoute(){
 }
 
 /* ---- leg claiming ---- */
-function renderLegs(claimed){
+function renderLegs(shown){
   const tb=$("#legtable tbody");tb.innerHTML="";
   for(let i=1;i<=8;i++){
     const tr=document.createElement("tr");
-    const on=claimed.includes(i);
-    tr.innerHTML="<td>L"+i+"</td>"+(on
+    const on=shown.includes(i);
+    tr.innerHTML="<td>L"+i+"</td><td"+(on?' class="ij"':"")+">Team "+i+"</td>"+(on
       ?"<td>"+LEGS[i][0]+"</td><td>"+LEGS[i][1]+"</td>"
       :'<td class="redact">■ ■ ■</td><td class="redact">■ ■ ■</td>');
     tb.appendChild(tr);
   }
 }
 renderLegs([]);
+const claimedTeams=new Set();
 
 /* ---- events ---- */
 $("#begin").addEventListener("click",()=>{
@@ -703,7 +757,7 @@ $("#begin").addEventListener("click",()=>{
   const housing=$("#tl-dock")||document.querySelector(".bar");
   if(housing) housing.classList.add("tl-live");
   arm(true); openLock(idx); paint();
-  timer=setInterval(()=>{if(!paused){remain--;paint();if(remain<=0){clearInterval(timer);}}},1000);
+  timer=setInterval(()=>{if(!paused){remain--;paint();if(remain<=0)expire();}},1000);
 });
 document.querySelectorAll("[data-submit]").forEach(b=>
   b.addEventListener("click",()=>submit(b.dataset.submit)));
@@ -713,9 +767,19 @@ document.querySelectorAll("[data-hint]").forEach(b=>b.addEventListener("click",(
 document.querySelectorAll("input").forEach(i=>i.addEventListener("keydown",e=>{
   if(e.key==="Enter"){const sec=i.closest(".lock");if(sec)submit(sec.id);}}));
 $("#claimbtn").addEventListener("click",()=>{
-  const nums=($("#claim").value.match(/[1-8]/g)||[]).map(Number);
-  renderLegs([...new Set(nums)]);
-  if(nums.length>2&&started){penalty(60,"hint");say("l5","err","More than two legs claimed · −60 s.");}
+  const m=$("#claim").value.match(/[1-8]/);
+  if(!m){ say("l5","err","Enter your team number — a single digit from 1 to 8."); return; }
+  const t=Number(m[0]);
+  if(claimedTeams.has(t)){ renderLegs([...claimedTeams]); return; }
+  const first=claimedTeams.size===0;
+  claimedTeams.add(t); renderLegs([...claimedTeams]);
+  if(first){
+    say("l5","tip","Team "+t+" · leg L"+t+" decrypted: ( "+LEGS[t][0]+" , "+LEGS[t][1]+
+      " ) km. Read those two numbers out when your team is called.");
+  } else {
+    if(started) penalty(60,"hint");
+    say("l5","err","Leg L"+t+" is another team's · −60 s. You only need your own — the board does the rest.");
+  }
 });
 $("#passbtn").addEventListener("click",()=>{
   if($("#pass").value.trim().toUpperCase()==="MA1003B"){
@@ -741,7 +805,7 @@ function buildBoard(){
       (sy<0?"− ":"+ ")+Math.abs(Math.round(sy*100)/100)+" ĵ ) km";
   });
 }
-$("#add5").addEventListener("click",()=>{remain+=300;paint();});
+$("#add5").addEventListener("click",()=>{ if(expired){ remain=300; unexpire(); } else { remain+=300; } paint(); });
 $("#pause").addEventListener("click",()=>{paused=!paused;$("#pause").textContent=paused?"Resume":"Pause";});
 
 openLock(0);paint();arm(false);
