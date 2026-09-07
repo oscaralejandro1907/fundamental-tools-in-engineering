@@ -1,0 +1,721 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ACT-07 · Telemetry Lockout — Vectors in 2D</title>
+<meta name="description" content="Five locks, forty-five minutes. Read the fleet in i, j notation, convert it, operate on it, and find the leg that is going nowhere. The dispatch server refuses any number you cannot defend.">
+<meta name="theme-color" content="#071523">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="../../assets/style.css">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%23071523'/%3E%3Crect x='7' y='7' width='18' height='18' fill='none' stroke='%234fd1e8' stroke-width='2' transform='rotate(45 16 16)'/%3E%3Crect x='13' y='13' width='6' height='6' fill='%23ffb020'/%3E%3C/svg%3E">
+
+<style>
+/* ============================================================
+   ACT-07 — TELEMETRY LOCKOUT
+   Blueprint dialect. Everything scoped to #app; the four class
+   names that clash with the site sheet carry a tl- prefix.
+   ============================================================ */
+.tl-wrap { max-width: 860px; margin: 0 auto; padding: 30px 0 90px; }
+
+.tl-strip {
+  display: flex; align-items: center; justify-content: space-between;
+  flex-wrap: wrap; gap: 14px;
+  padding-bottom: 18px; margin-bottom: 26px;
+  border-bottom: 1px solid var(--line-hard);
+}
+.tl-back {
+  font-family: var(--mono); font-size: 10.5px; letter-spacing: .18em;
+  text-transform: uppercase; color: var(--ink-faint);
+  display: inline-flex; align-items: center; gap: 9px;
+  transition: color .25s, gap .3s var(--ease);
+}
+.tl-back:hover { color: var(--cyan); gap: 14px; }
+
+#app { position: relative; z-index: 5; }
+#app {
+  --tl-soft-amber: rgba(255,176,32,.13);
+  --tl-soft-green: rgba(82,227,164,.12);
+  --tl-soft-red:   rgba(255,95,86,.13);
+}
+
+/* ---------- floating shift clock ---------- */
+.tl-dock {
+  position: fixed; z-index: 55;
+  right: clamp(12px, 3vw, 26px); bottom: clamp(12px, 3vw, 26px);
+  display: flex; align-items: center; gap: 14px;
+  padding: 10px 16px;
+  background: rgba(6,18,30,.93);
+  border: 1px solid var(--line-hard);
+  backdrop-filter: blur(10px);
+}
+.tl-dock .rail { display: flex; gap: 4px; }
+.tl-dock .pip { width: 20px; height: 4px; background: var(--line-hard); }
+.tl-dock .pip.on { background: var(--amber); }
+.tl-dock .pip.done { background: var(--green); }
+.tl-dock .clock {
+  font-family: var(--mono); font-weight: 600; font-size: 20px;
+  font-variant-numeric: tabular-nums; color: var(--amber);
+  min-width: 76px; text-align: right;
+}
+.tl-dock .clock.warn { color: var(--red); }
+.tl-dock .clock.idle { color: var(--ink-faint); }
+@media (max-width: 560px) {
+  .tl-dock { left: 12px; right: 12px; justify-content: space-between; }
+}
+
+/* ---------- masthead ---------- */
+#app .head { padding: 0 0 8px; margin-bottom: 26px; }
+#app .tl-eyebrow {
+  font-family: var(--mono); font-size: 11px; letter-spacing: .2em;
+  text-transform: uppercase; color: var(--ink-faint);
+  display: flex; flex-wrap: wrap; gap: 6px 16px; margin-bottom: 16px;
+}
+#app h1 {
+  font-family: var(--display); font-weight: 800;
+  font-size: clamp(42px, 9vw, 74px); line-height: .92; letter-spacing: .01em;
+  text-transform: uppercase; margin: 0 0 16px; text-wrap: balance;
+}
+#app h1 em { font-style: normal; color: var(--amber); display: block; }
+#app .tl-lede { color: var(--ink-soft); max-width: 62ch; margin: 0 0 20px; font-size: 16px; }
+#app .tl-lede strong { color: var(--ink); font-weight: 600; }
+#app .terms { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 26px; }
+#app .term {
+  font-family: var(--mono); font-size: 11.5px; padding: 6px 11px;
+  border: 1px solid var(--line-coarse); color: var(--ink-soft);
+  background: var(--paper-raised);
+}
+#app .term b { color: var(--amber); font-weight: 500; }
+#app .begin {
+  font-family: var(--display); font-weight: 800; font-size: 23px;
+  letter-spacing: .12em; text-transform: uppercase;
+  background: var(--amber); color: var(--paper-deep);
+  border: 0; padding: 13px 32px; cursor: pointer; transition: filter .2s;
+}
+#app .begin:hover { filter: brightness(1.12); }
+#app .begin:disabled { background: var(--line-hard); color: var(--ink-faint); cursor: default; }
+
+/* ---------- lock panels ---------- */
+#app .lock {
+  position: relative;
+  border: 1px solid var(--line-coarse); border-left: 3px solid var(--line-hard);
+  background: var(--paper-raised); margin-bottom: 14px; overflow: hidden;
+}
+#app .lock::before {
+  content: ''; position: absolute; inset: 0; pointer-events: none;
+  background-image:
+    linear-gradient(to right, var(--line-fine) 1px, transparent 1px),
+    linear-gradient(to bottom, var(--line-fine) 1px, transparent 1px);
+  background-size: 24px 24px;
+}
+#app .lock > * { position: relative; }
+#app .lock.active { border-left-color: var(--amber); }
+#app .lock.cleared { border-left-color: var(--green); }
+#app .lock-head { display: flex; align-items: baseline; gap: 13px; padding: 16px 20px; }
+#app .lock-no { font-family: var(--mono); font-size: 12px; color: var(--ink-faint); letter-spacing: .1em; }
+#app .lock-name {
+  font-family: var(--display); font-weight: 700; font-size: 27px;
+  letter-spacing: .05em; text-transform: uppercase; line-height: 1;
+}
+#app .lock.sealed .lock-name { color: var(--ink-faint); }
+#app .state {
+  margin-left: auto; font-family: var(--mono); font-size: 10px;
+  letter-spacing: .16em; text-transform: uppercase; padding: 4px 9px; white-space: nowrap;
+}
+#app .state.sealed { color: var(--ink-faint); border: 1px solid var(--line-coarse); }
+#app .state.active { color: var(--amber); border: 1px solid var(--amber); background: var(--tl-soft-amber); }
+#app .state.cleared { color: var(--green); border: 1px solid var(--green); background: var(--tl-soft-green); }
+#app .lock-body { padding: 0 20px 22px; display: flex; flex-direction: column; gap: 17px; }
+#app .lock.cleared .lock-body, #app .lock.sealed .lock-body { display: none; }
+#app .brief { color: var(--ink-soft); margin: 0; max-width: 64ch; }
+#app .brief b { color: var(--ink); font-weight: 600; }
+#app .vec { font-weight: 700; font-style: italic; }
+
+/* ---------- data ---------- */
+#app .tablewrap { overflow-x: auto; border: 1px solid var(--line-coarse); background: rgba(4,16,28,.55); }
+#app table {
+  border-collapse: collapse; width: 100%; font-family: var(--mono);
+  font-size: 13.5px; font-variant-numeric: tabular-nums; white-space: nowrap;
+}
+#app th {
+  text-align: left; font-weight: 500; font-size: 10.5px; letter-spacing: .16em;
+  text-transform: uppercase; color: var(--ink-faint);
+  padding: 10px 15px; border-bottom: 1px solid var(--line-coarse);
+}
+#app td { padding: 9px 15px; border-bottom: 1px solid var(--line-fine); color: var(--ink); }
+#app tr:last-child td { border-bottom: 0; }
+#app .ij { color: var(--amber); }
+#app .redact { color: var(--ink-faint); letter-spacing: .1em; }
+#app .note {
+  font-family: var(--mono); font-size: 12.5px; color: var(--ink-faint);
+  border-left: 2px solid var(--line-hard); padding: 3px 0 3px 13px; margin: 0; max-width: 62ch;
+}
+#app .note b { color: var(--amber); font-weight: 500; }
+#app .formula {
+  font-family: var(--mono); font-size: 14.5px; background: rgba(4,16,28,.6);
+  border: 1px solid var(--line-coarse); padding: 13px 16px;
+  overflow-x: auto; white-space: nowrap; color: var(--ink);
+}
+
+/* ---------- entry ---------- */
+#app .entry { display: flex; flex-wrap: wrap; gap: 13px; align-items: flex-end; }
+#app .field { display: flex; flex-direction: column; gap: 6px; }
+#app .field label {
+  font-family: var(--mono); font-size: 10.5px; letter-spacing: .13em;
+  text-transform: uppercase; color: var(--ink-soft);
+}
+#app .field input {
+  font-family: var(--mono); font-weight: 500; font-size: 17px; width: 9.5ch;
+  padding: 10px; background: var(--paper-deep); color: var(--ink);
+  border: 1px solid var(--line-hard); text-align: center;
+}
+#app .field input.wide { width: 15ch; letter-spacing: .18em; }
+#app .field input:focus { outline: 2px solid var(--cyan); outline-offset: 1px; border-color: var(--cyan); }
+#app .field input.bad { border-color: var(--red); background: var(--tl-soft-red); }
+#app .field input.good { border-color: var(--green); background: var(--tl-soft-green); }
+#app .tl-btn {
+  font-family: var(--display); font-weight: 700; font-size: 19px; letter-spacing: .1em;
+  text-transform: uppercase; padding: 11px 22px; cursor: pointer;
+  border: 1px solid var(--amber); background: var(--amber); color: var(--paper-deep);
+  transition: filter .2s;
+}
+#app .tl-btn:hover { filter: brightness(1.12); }
+#app .tl-btn.tl-ghost { background: transparent; color: var(--ink-soft); border-color: var(--line-hard); }
+#app .tl-btn.tl-ghost:hover { color: var(--cyan); border-color: var(--cyan); filter: none; }
+#app .msg { font-family: var(--mono); font-size: 13px; padding: 11px 14px; display: none; max-width: 66ch; }
+#app .msg.show { display: block; }
+#app .msg.err { color: #ffc8c3; background: var(--tl-soft-red); border: 1px solid rgba(255,95,86,.45); }
+#app .msg.tip { color: var(--amber-hot); background: var(--tl-soft-amber); border: 1px solid rgba(255,176,32,.45); }
+#app .shake { animation: tlsh .32s; }
+@keyframes tlsh { 25% { transform: translateX(-5px); } 75% { transform: translateX(5px); } }
+@media (prefers-reduced-motion: reduce) { #app .shake { animation: none; } }
+
+/* ---------- cleared payoff ---------- */
+#app .payoff { padding: 0 20px 20px; display: none; }
+#app .lock.cleared .payoff { display: block; }
+#app .payoff p { margin: 0; color: var(--ink-soft); border-left: 2px solid var(--green); padding-left: 14px; max-width: 64ch; }
+#app .payoff b { color: var(--ink); font-weight: 600; }
+
+/* ---------- endgame ---------- */
+#app .end { display: none; border: 1px solid var(--green); background: var(--paper-raised); padding: 28px 22px; margin-top: 24px; }
+#app .end.show { display: block; }
+#app .end h2 {
+  font-family: var(--display); font-weight: 800; font-size: 42px; letter-spacing: .04em;
+  text-transform: uppercase; margin: 0 0 8px; color: var(--green); line-height: 1;
+}
+#app .stats {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+  gap: 1px; background: var(--line-coarse); border: 1px solid var(--line-coarse); margin: 22px 0;
+}
+#app .stat { background: var(--paper-raised); padding: 14px 16px; }
+#app .stat dt {
+  font-family: var(--mono); font-size: 10px; letter-spacing: .15em;
+  text-transform: uppercase; color: var(--ink-faint); margin-bottom: 5px;
+}
+#app .stat dd { font-family: var(--mono); font-weight: 600; font-size: 22px; margin: 0; font-variant-numeric: tabular-nums; }
+#app #routeplot { width: 100%; height: auto; display: block; border: 1px solid var(--line-coarse); background: var(--paper-deep); }
+
+/* ---------- instructor control ---------- */
+#app .control { margin-top: 46px; border-top: 1px solid var(--line-hard); padding-top: 18px; }
+#app .control summary {
+  font-family: var(--mono); font-size: 11px; letter-spacing: .16em;
+  text-transform: uppercase; color: var(--ink-faint); cursor: pointer; list-style: none;
+}
+#app .control summary::-webkit-details-marker { display: none; }
+#app .control summary:hover { color: var(--cyan); }
+#app .ctrl-body { margin-top: 18px; display: none; }
+#app .ctrl-body.open { display: block; }
+#app .board { display: grid; grid-template-columns: repeat(auto-fit, minmax(155px, 1fr)); gap: 11px; margin: 15px 0; }
+#app .board .field input { width: 100%; }
+#app .total {
+  font-family: var(--mono); font-size: 17px; padding: 13px 16px;
+  border: 1px solid var(--amber); background: var(--tl-soft-amber); color: var(--ink);
+}
+#app h3 {
+  font-family: var(--display); font-weight: 700; font-size: 21px; letter-spacing: .06em;
+  text-transform: uppercase; margin: 24px 0 9px; color: var(--cyan);
+}
+</style>
+</head>
+<body>
+
+<div class="substrate" aria-hidden="true"></div>
+<div class="grain" aria-hidden="true"></div>
+<div class="crosshair" aria-hidden="true"><span></span></div>
+
+<!-- ===================== NAV ===================== -->
+<nav class="nav">
+  <div class="nav-in">
+    <a class="brand" href="../../index.html">
+      <span class="brand-mark" aria-hidden="true"></span>
+      <span class="brand-txt">
+        <b>Drafting Table</b>
+        <small>MA1003B · Fundamental Tools</small>
+      </span>
+    </a>
+    <button class="nav-toggle" aria-expanded="false">[ MENU ]</button>
+    <ul class="nav-links">
+      <li><a href="../../index.html">Activities</a></li>
+      <li><a href="../../challenge.html">Challenge</a></li>
+      <li><a href="../../roadmap.html">Roadmap</a></li>
+      <li><a href="../../resources.html">Resources</a></li>
+    </ul>
+  </div>
+</nav>
+
+<main class="shell tl-wrap">
+  <div class="tl-strip">
+    <div class="eyebrow amber">ACT-07 · Session 07 · Vector escape room</div>
+    <a class="tl-back" href="../../index.html"><span aria-hidden="true">◂</span> Back to activities</a>
+  </div>
+
+  <div id="app">
+<div class="tl-dock" id="tl-dock">
+  <div class="rail" id="rail"></div>
+  <div class="clock idle" id="clock">45:00</div>
+</div>
+<div class="wrap">
+
+<header class="head">
+  <div class="tl-eyebrow"><span>Terminal 04</span><span>Shift-change fault 0x1J</span><span>MA1003B · Session 7</span></div>
+  <h1>Telemetry<em>Lockout</em></h1>
+  <p class="tl-lede">Unit 07 is stranded on the ring road with a cold-chain load on board. The routing server
+  locked itself at shift change and will not reopen until <strong>five telemetry checks</strong> clear.
+  Everything you need is already in tonight's log — it is just written in î and ĵ.</p>
+  <div class="terms">
+    <div class="term">Shift clock <b>45:00</b></div>
+    <div class="term">Rejected entry <b>−20 s</b></div>
+    <div class="term">Hint <b>−60 s</b></div>
+    <div class="term">Calculators &amp; spreadsheets <b>allowed</b></div>
+    <div class="term">AI <b>not allowed</b></div>
+  </div>
+  <button class="begin" id="begin">Begin shift</button>
+</header>
+
+<!-- ============ LOCK 1 ============ -->
+<section class="lock sealed" id="l1">
+  <div class="lock-head"><span class="lock-no">01</span><span class="lock-name">Sign check</span>
+    <span class="state sealed">Sealed</span></div>
+  <div class="lock-body">
+    <p class="brief">Five units reported in. For each one, enter the <b>quadrant</b> its velocity points into —
+    1, 2, 3 or 4, counter-clockwise from the north-east. If a vector lies exactly <b>on an axis</b>, it is in no
+    quadrant at all: enter <b>0</b>. Type the five digits in the order listed.</p>
+    <p class="note">Put the calculator down. This lock can be read off the signs alone, and it is timed to
+    punish anyone who starts computing angles.</p>
+    <div class="tablewrap"><table>
+      <thead><tr><th>Unit</th><th>Reported velocity (km/h)</th></tr></thead>
+      <tbody>
+        <tr><td>07</td><td>−40 <span class="ij">î</span> + 30 <span class="ij">ĵ</span></td></tr>
+        <tr><td>24</td><td>108.8 <span class="ij">î</span> − 50.7 <span class="ij">ĵ</span></td></tr>
+        <tr><td>15</td><td>63.9 <span class="ij">î</span> + 48.1 <span class="ij">ĵ</span></td></tr>
+        <tr><td>41</td><td>0 <span class="ij">î</span> − 200 <span class="ij">ĵ</span></td></tr>
+        <tr><td>33</td><td>−65.1 <span class="ij">î</span> − 54.6 <span class="ij">ĵ</span></td></tr>
+      </tbody></table></div>
+    <div class="entry">
+      <div class="field"><label for="l1code">Quadrant string</label>
+        <input id="l1code" class="wide" type="text" autocomplete="off" maxlength="5" placeholder="•••••"></div>
+      <button class="tl-btn" data-submit="l1">Transmit</button>
+      <button class="tl-btn tl-ghost" data-hint="l1">Hint −60s</button>
+    </div>
+    <div class="msg" id="m-l1"></div>
+  </div>
+  <div class="payoff"><p>Five vectors, no trigonometry, no calculator. That is what î and ĵ buy you — direction
+  becomes something you <b>read</b> instead of something you compute. And Unit 41 is in no quadrant at all: with
+  a zero x-component it runs straight down the −ĵ axis, due south.</p></div>
+</section>
+
+<!-- ============ LOCK 2 ============ -->
+<section class="lock sealed" id="l2">
+  <div class="lock-head"><span class="lock-no">02</span><span class="lock-name">Format conversion</span>
+    <span class="state sealed">Sealed</span></div>
+  <div class="lock-body">
+    <p class="brief">Three entries arrived from the old handheld units, which still report
+    <b>magnitude and bearing</b>. Dispatch only accepts î, ĵ. Angles are measured counter-clockwise from +î.</p>
+    <div class="tablewrap"><table>
+      <thead><tr><th>Entry</th><th>As logged</th><th>As dispatch needs it</th></tr></thead>
+      <tbody>
+        <tr><td>A</td><td>120 m at 25°</td><td>Ax = ? &nbsp; (Ay = 51)</td></tr>
+        <tr><td>B</td><td>85 m at 140°</td><td>Bx = ? &nbsp; (By = 55)</td></tr>
+        <tr><td>C</td><td>200 m at 270°</td><td class="redact">0 î − 200 ĵ &nbsp;· cleared</td></tr>
+        <tr><td>D</td><td>−40 î + 30 ĵ</td><td>direction = ? °</td></tr>
+      </tbody></table></div>
+    <p class="note">Round A and B to the <b>nearest whole metre</b>, signs included. Give D's direction as a whole
+    number of degrees between <b>0 and 360</b>.</p>
+    <div class="entry">
+      <div class="field"><label for="l2ax">Ax (m)</label><input id="l2ax" type="text" autocomplete="off"></div>
+      <div class="field"><label for="l2bx">Bx (m)</label><input id="l2bx" type="text" autocomplete="off"></div>
+      <div class="field"><label for="l2thd">Direction of D (°)</label><input id="l2thd" type="text" autocomplete="off"></div>
+      <button class="tl-btn" data-submit="l2">Transmit</button>
+      <button class="tl-btn tl-ghost" data-hint="l2">Hint −60s</button>
+    </div>
+    <div class="msg" id="m-l2"></div>
+  </div>
+  <div class="payoff"><p><b>D = 50 m at 143°.</b> Your calculator said −36.87°, and it was not lying — it answered
+  a different question. Tangent repeats every 180°, so arctan has to choose one branch and it always chooses the
+  one running through quadrants I and IV. It <b>cannot reach</b> quadrant II. The components said (−, +); you
+  supplied the missing 180°.</p></div>
+</section>
+
+<!-- ============ LOCK 3 ============ -->
+<section class="lock sealed" id="l3">
+  <div class="lock-head"><span class="lock-no">03</span><span class="lock-name">Route arithmetic</span>
+    <span class="state sealed">Sealed</span></div>
+  <div class="lock-body">
+    <p class="brief">Two units left the depot together. Vector names are written in <span class="vec">bold italic</span>:</p>
+    <div class="formula"><span class="vec">u</span> = ( 3 <span class="ij">î</span> + 4 <span class="ij">ĵ</span> ) km
+      &nbsp;&nbsp;&nbsp; <span class="vec">v</span> = ( −5 <span class="ij">î</span> + 2 <span class="ij">ĵ</span> ) km</div>
+    <p class="brief">Before you compute anything: will <b><span class="vec">u</span> + <span class="vec">v</span></b> point more east or more west?
+    More north or more south? Say it out loud as a team, then check whether the numbers agree.</p>
+    <div class="entry">
+      <div class="field"><label for="l3rx">(u+v) x</label><input id="l3rx" type="text" autocomplete="off"></div>
+      <div class="field"><label for="l3ry">(u+v) y</label><input id="l3ry" type="text" autocomplete="off"></div>
+      <div class="field"><label for="l3tx">(2u−v) x</label><input id="l3tx" type="text" autocomplete="off"></div>
+      <div class="field"><label for="l3ty">(2u−v) y</label><input id="l3ty" type="text" autocomplete="off"></div>
+      <div class="field"><label for="l3mag">|u+v| km, 2 dp</label><input id="l3mag" type="text" autocomplete="off"></div>
+      <div class="field"><label for="l3th">its direction °</label><input id="l3th" type="text" autocomplete="off"></div>
+    </div>
+    <div class="entry">
+      <button class="tl-btn" data-submit="l3">Transmit</button>
+      <button class="tl-btn tl-ghost" data-hint="l3">Hint −60s</button>
+    </div>
+    <p class="note">On paper as well, not entered here: <b><span class="vec">u</span> − <span class="vec">v</span></b>; check that
+    <span class="vec">u</span> + (−<span class="vec">u</span>) = 0; and settle whether <b>|3<span class="vec">u</span>| = 3|<span class="vec">u</span>|</b>.</p>
+    <div class="msg" id="m-l3"></div>
+  </div>
+  <div class="payoff"><p><b>|u+v| = 6.32 km at 108°.</b> Adding the magnitudes instead would have given 10.39 km —
+  the same error the class made in the very first vector session, one week older. And 108° is quadrant II again,
+  so arctan needed the same 180° correction as D. One more thing worth keeping: <b>|3u| = 3|u| = 15</b> exactly.
+  Scaling stretches a vector; it never turns it.</p></div>
+</section>
+
+<!-- ============ LOCK 4 ============ -->
+<section class="lock sealed" id="l4">
+  <div class="lock-head"><span class="lock-no">04</span><span class="lock-name">Dot product</span>
+    <span class="state sealed">Sealed</span></div>
+  <div class="lock-body">
+    <div class="formula"><span class="vec">A</span> · <span class="vec">B</span> = A<sub>x</sub>B<sub>x</sub> + A<sub>y</sub>B<sub>y</sub>
+      = |<span class="vec">A</span>| |<span class="vec">B</span>| cos θ<sub>AB</sub></div>
+    <p class="brief"><b>Part A.</b> Before calculating, predict the sign of each — positive, negative or zero —
+    and say why. Then compute the four values and enter them.</p>
+    <div class="entry">
+      <div class="field"><label for="l4d1">î · ĵ</label><input id="l4d1" type="text" autocomplete="off"></div>
+      <div class="field"><label for="l4d2">(2,3)·(2,3)</label><input id="l4d2" type="text" autocomplete="off"></div>
+      <div class="field"><label for="l4d3">(4,0)·(0,5)</label><input id="l4d3" type="text" autocomplete="off"></div>
+      <div class="field"><label for="l4d4">(3,4)·(−4,3)</label><input id="l4d4" type="text" autocomplete="off"></div>
+    </div>
+    <p class="brief"><b>Part B — tonight's log.</b> The lane runs along <b><span class="vec">L</span> = (4 î + 3 ĵ)</b>. A leg whose
+    dot product with <span class="vec">L</span> is <b>negative</b> was driven against the route. Sweep all twelve.</p>
+    <div class="tablewrap"><table>
+      <thead><tr><th>Leg</th><th>x</th><th>y</th><th>Leg</th><th>x</th><th>y</th></tr></thead>
+      <tbody>
+        <tr><td>P1</td><td>5</td><td>3</td><td>P7</td><td>−8</td><td>7</td></tr>
+        <tr><td>P2</td><td>−7</td><td>4</td><td>P8</td><td>3</td><td>3</td></tr>
+        <tr><td>P3</td><td>2</td><td>−6</td><td>P9</td><td>−3</td><td>4</td></tr>
+        <tr><td>P4</td><td>−9</td><td>8</td><td>P10</td><td>1</td><td>−7</td></tr>
+        <tr><td>P5</td><td>6</td><td>2</td><td>P11</td><td>9</td><td>−2</td></tr>
+        <tr><td>P6</td><td>−4</td><td>−5</td><td>P12</td><td>−2</td><td>−1</td></tr>
+      </tbody></table></div>
+    <p class="note">Twelve dot products by hand is about eight minutes. In a spreadsheet it is
+    <b>=SUMPRODUCT()</b> and thirty seconds. Your clock is running — your call.</p>
+    <div class="entry">
+      <div class="field"><label for="l4neg">Legs against the lane</label><input id="l4neg" type="text" autocomplete="off"></div>
+      <div class="field"><label for="l4perp">Leg exactly across it</label><input id="l4perp" type="text" autocomplete="off" placeholder="P?"></div>
+      <button class="tl-btn" data-submit="l4">Transmit</button>
+      <button class="tl-btn tl-ghost" data-hint="l4">Hint −60s</button>
+    </div>
+    <div class="msg" id="m-l4"></div>
+  </div>
+  <div class="payoff"><p>Three of the four in Part A were <b>zero</b>, and only the first was obvious.
+  (3,4)·(−4,3) = −12 + 12: that pair is perpendicular and nothing in the components announces it — (−4, 3) is
+  (3, 4) turned through 90°. <b>That is what the dot product is for.</b> It detects perpendicularity you cannot
+  see, and its sign tells you whether motion helps or fights a direction. Seven legs of twelve were driven
+  against the lane, and P9 was exactly across it: full speed, zero progress.</p></div>
+</section>
+
+<!-- ============ LOCK 5 ============ -->
+<section class="lock sealed" id="l5">
+  <div class="lock-head"><span class="lock-no">05</span><span class="lock-name">The route</span>
+    <span class="state sealed">Sealed</span></div>
+  <div class="lock-body">
+    <p class="brief">Unit 07's outbound route was eight legs long, and the log was split across the fleet at
+    shift change. <b>No team holds all eight.</b> Claim the legs your instructor assigned you, sum them into a
+    partial, and put that partial on the board. The class total is the sum of every team's partial — then convert
+    it and the depot reopens.</p>
+    <div class="entry">
+      <div class="field"><label for="claim">Your assigned legs</label>
+        <input id="claim" type="text" class="wide" autocomplete="off" placeholder="e.g. 3,4"></div>
+      <button class="tl-btn tl-ghost" id="claimbtn">Decrypt</button>
+    </div>
+    <div class="tablewrap"><table id="legtable">
+      <thead><tr><th>Leg</th><th>x (km)</th><th>y (km)</th></tr></thead><tbody></tbody></table></div>
+    <p class="note">Claiming legs you were not assigned costs <b>60 seconds</b> — and it does not save you any,
+    because the board is where the totals meet anyway.</p>
+    <div class="entry">
+      <div class="field"><label for="l5rmag">|R| of class total (km)</label><input id="l5rmag" type="text" autocomplete="off"></div>
+      <div class="field"><label for="l5rth">its direction °</label><input id="l5rth" type="text" autocomplete="off"></div>
+      <button class="tl-btn" data-submit="l5">Transmit</button>
+      <button class="tl-btn tl-ghost" data-hint="l5">Hint −60s</button>
+    </div>
+    <div class="msg" id="m-l5"></div>
+  </div>
+  <div class="payoff"><p>Every partial was computed by a different team, in a different order, and the total came
+  out the same. <b>Vector addition does not care who adds what first</b> — which is exactly why a fleet can be
+  tracked from twelve handsets that never talk to each other.</p></div>
+</section>
+
+<!-- ============ ENDGAME ============ -->
+<section class="end" id="end">
+  <h2>Depot reopened</h2>
+  <p class="brief">Unit 07 has its route back. Here is what your class reconstructed, leg by leg, from a log
+  nobody could read an hour ago.</p>
+  <dl class="stats">
+    <div class="stat"><dt>Shift time used</dt><dd id="s-time">—</dd></div>
+    <div class="stat"><dt>Rejected entries</dt><dd id="s-rej">—</dd></div>
+    <div class="stat"><dt>Distance driven</dt><dd>59.9 km</dd></div>
+    <div class="stat"><dt>Displacement</dt><dd>20.0 km</dd></div>
+  </dl>
+  <svg id="routeplot" viewBox="0 0 640 400" role="img"
+    aria-label="The eight-leg route drawn tip to tail, with the resultant from depot to Unit 07"></svg>
+  <p class="brief" style="margin-top:18px">Unit 07 drove <b>59.9 km</b> to end up <b>20 km</b> from the
+  depot. The gap between those two numbers is the whole idea: a route is a sum of vectors, and only the sum
+  decides where you end up.</p>
+  <p class="brief">Your challenge vehicle runs a 5 m track one metre wide. That lane is a vector, exactly like
+  <span class="vec">L</span> was tonight. Thrust that is 5° off it loses 19 mm of forward progress and gains 436 mm sideways —
+  and a dot product is how you tell the difference before the run, not after.</p>
+</section>
+
+<!-- ============ CONTROL ============ -->
+<details class="control">
+  <summary>Dispatch control · instructor</summary>
+  <div id="ctrl-gate">
+    <div class="entry" style="margin-top:12px">
+      <div class="field"><label for="pass">Passcode</label><input id="pass" type="password" class="wide" autocomplete="off"></div>
+      <button class="tl-btn tl-ghost" id="passbtn">Unlock</button>
+    </div>
+  </div>
+  <div class="ctrl-body" id="ctrl-body">
+    <h3>Class board — lock 05</h3>
+    <p class="note">Type each team's partial as they call it out. The total updates live; project this.</p>
+    <div class="board" id="board"></div>
+    <div class="total" id="boardtotal">Class total: (0 î + 0 ĵ) km</div>
+    <h3>Leg assignment</h3>
+    <div class="tablewrap"><table>
+      <thead><tr><th>Teams</th><th>Assignment</th></tr></thead>
+      <tbody>
+        <tr><td>4</td><td>1,2 · 3,4 · 5,6 · 7,8</td></tr>
+        <tr><td>5</td><td>1,2 · 3,4 · 5,6 · 7 · 8</td></tr>
+        <tr><td>6</td><td>1,2 · 3,4 · 5 · 6 · 7 · 8</td></tr>
+        <tr><td>7</td><td>1,2 · 3 · 4 · 5 · 6 · 7 · 8</td></tr>
+        <tr><td>8</td><td>one leg each</td></tr>
+        <tr><td>9+</td><td>double up two teams on one leg — they cross-check each other</td></tr>
+      </tbody></table></div>
+    <h3>Clock</h3>
+    <div class="entry">
+      <button class="tl-btn tl-ghost" id="add5">+5 min</button>
+      <button class="tl-btn tl-ghost" id="pause">Pause</button>
+    </div>
+  </div>
+</details>
+
+</div>
+  </div>
+</main>
+
+<footer class="foot">
+  <div class="foot-bar">
+    <span>ACT-07 · Telemetry Lockout · Vectors in 2D</span>
+    <span>Runs offline · Nothing uploaded · Nothing saved</span>
+  </div>
+</footer>
+
+<script src="../../assets/app.js"></script>
+<script>
+const A = {"l1": [{"key": "code", "ok": [629126723], "bad": {"4257489661": "Five units are listed, not four — and one of them is not in any quadrant.", "2408654095": "Four digits, five units. Check Unit 41 again: which quadrant contains a vector that points straight down the axis?", "3178927453": "Unit 41 is (0î − 200ĵ). Its x-component is exactly zero, so it sits ON the axis, not inside a quadrant.", "2910191359": "Unit 41 is (0î − 200ĵ). Its x-component is exactly zero, so it sits ON the axis, not inside a quadrant.", "3133498241": "Check Unit 24: x is positive, y is negative. Count counter-clockwise from quadrant I."}}], "l2": [{"key": "ax", "ok": [1882448583], "bad": {"2229355059": "You used sine where cosine belongs. The x-component is the side ADJACENT to the 25° angle.", "2212577440": "You used sine where cosine belongs. The x-component is the side ADJACENT to the 25° angle.", "1472213591": "Right value, wrong format — round to the nearest whole metre.", "3686896098": "Right value, wrong format — round to the nearest whole metre.", "1865670964": "Close. Round 108.76 to the nearest whole metre, don't truncate it.", "1933075630": "That is the magnitude, not the component. Ax = |A| cos θ.", "2350930344": "25° is in quadrant I. Both components are positive.", "1949706154": "Your calculator is in radian mode. cos(25 rad) is not cos(25°)."}}, {"key": "bx", "ok": [3704863021], "bad": {"417916660": "Magnitude is right, sign is not. 140° is past 90° — which way does î point there?", "2296465535": "You used sine where cosine belongs, and you lost the sign as well.", "1288738790": "You used sine where cosine belongs. Bx = 85 cos 140°.", "2040330635": "Right value, wrong format — round to the nearest whole metre.", "3688085402": "Close. 85 cos 140° = −65.11, which rounds to −65.", "2365694582": "That is the magnitude, not the component."}}, {"key": "thd", "ok": [1915312273, 2176733588, 3852110309], "bad": {"1254889362": "That is what your calculator said, and it is the classic trap. arctan can only answer between −90° and +90°. Look at the signs of D and decide which quadrant it is actually in.", "3580612148": "That is what your calculator said, and it is the classic trap. arctan only ever answers between −90° and +90°. Which quadrant is (−40, +30) really in?", "2331006511": "You dropped the calculator's minus sign. That is not the fix — the fix is a quadrant correction.", "1011574233": "You added 360° to −37°. But 323° is in quadrant IV, and D is not. Add 180°, not 360°.", "2262910297": "You divided the wrong way round. tan θ = opposite/adjacent = Dy/Dx.", "3169127873": "Check your arithmetic: −36.87° + 180° is not 217°.", "2212577440": "That is the magnitude of D, not its direction."}}], "l3": [{"key": "rx", "ok": [365759422], "bad": {"923577301": "Sign lost. 3 + (−5) is negative.", "1024243015": "That is u − v. Read the operation again.", "197983232": "Check the signs: 3 + (−5)."}}, {"key": "ry", "ok": [856466825], "bad": {"923577301": "That is u − v. Read the operation again.", "432869898": "Both y-components are positive: 4 + 2."}}, {"key": "tx", "ok": [485174231], "bad": {"873244444": "vx is −5, so 6 − (−5) = 6 + 5. Subtracting a negative adds. (Adding instead of subtracting also gives 1.)", "1024243015": "That is u − v — you subtracted before doubling. 2u = (6, 8), so the x-component is 6 − (−5).", "434841374": "You doubled after subtracting. The expression is 2u − v, not 2(u − v).", "3636913902": "6 − (−5) is positive."}}, {"key": "ty", "ok": [856466825], "bad": {"923577301": "That is u − v — you subtracted before doubling. 2uy = 8, so it is 8 − 2.", "468396612": "You added instead of subtracting: 8 + 2. The operation is 2u − v.", "1024243015": "You stopped at 2uy. Now subtract vy = 2.", "822911587": "You doubled after subtracting. The expression is 2u − v, not 2(u − v)."}}, {"key": "mag", "ok": [3329033328, 4251938786, 2728245407, 3345810947, 2772922446], "bad": {"3035552618": "You added the magnitudes: |u| + |v|. That is exactly the mistake the whole class made in session six. Add the COMPONENTS first, then take the magnitude of the result.", "3052330237": "You added the magnitudes instead of the components.", "2313390249": "You forgot the square root. |R| = √(Rx² + Ry²).", "856466825": "Close, but that is only Ry. The magnitude uses both components.", "1024243015": "Check: √((−2)² + 6²), and remember (−2)² is positive."}}, {"key": "th", "ok": [1865670964, 3754006574, 1522693543], "bad": {"3755342973": "arctan again. It answered −71.57°, which is quadrant IV. Rx is negative and Ry is positive — which quadrant is that?", "2053387058": "arctan answered in quadrant IV. Rx < 0 and Ry > 0, so apply the correction.", "2380647820": "You dropped the minus instead of correcting the quadrant.", "1006345213": "You added 360°. That lands in quadrant IV. The correction here is 180°.", "334175660": "You divided the wrong way round. tan θ = Ry/Rx.", "4180585028": "Check the arithmetic: −71.57° + 180°."}}], "l4": [{"key": "d1", "ok": [890022063], "bad": {"873244444": "They are both unit vectors, but they point along different axes. Write them as components: (1,0)·(0,1).", "923577301": "Use A·B = AxBx + AyBy on (1,0) and (0,1)."}}, {"key": "d2", "ok": [518729469], "bad": {"2297598368": "That is (2+3)². Multiply component by matching component, then add.", "806133968": "That is the sum of the components, not the dot product.", "856466825": "Multiply x by x and y by y, then add: 2·2 + 3·3.", "2606311045": "The dot product is a number, not a magnitude."}}, {"key": "d3", "ok": [890022063], "bad": {"2381486463": "You multiplied the magnitudes. Use components: (4,0)·(0,5) = 4·0 + 0·5.", "1007465396": "Check each product: 4·0 and 0·5."}}, {"key": "d4", "ok": [890022063], "bad": {"2314375987": "You dropped a sign. 3·(−4) is negative; 4·3 is positive. Now add them.", "3687393854": "Only one of the two products is negative. 3·(−4) = −12 and 4·3 = +12.", "3620136283": "That is only the first product. Add the second one.", "501951850": "That is only the second product. Add the first one, and mind its sign."}}, {"key": "neg", "ok": [839689206], "bad": {"822911587": "That is how many legs had a POSITIVE dot product — those are the ones making progress.", "1024243015": "You counted the perpendicular leg as negative. Zero is neither.", "806133968": "Recount — check every leg, including the ones with two negative components.", "856466825": "Recount. A leg counts as negative when 4x + 3y is below zero, not when x is.", "485174231": "You counted every leg that is not clearly positive. Zero is its own case."}}, {"key": "perp", "ok": [1007465396], "bad": {"873244444": "P1 has the largest dot product, not a zero one. Perpendicular means the products cancel exactly.", "501951850": "Check P12 again: 4(−2) + 3(−1).", "906799682": "Check P3 again: 4(2) + 3(−6)."}}], "l5": [{"key": "rmag", "ok": [2381486463], "bad": {"2855274715": "You forgot the square root.", "2328634418": "That is the distance driven along the whole route, not the displacement from the depot. Session six, all over again.", "367583803": "That is roughly the distance driven, not the straight-line displacement.", "2515707415": "You added the leg magnitudes instead of the components.", "501951850": "That is only Rx. The magnitude uses both components.", "434841374": "That is only Ry. The magnitude uses both components."}}, {"key": "rth", "ok": [1983408487, 3795432687, 178522645], "bad": {"1322294028": "arctan, one last time. Rx is negative and Ry is positive — quadrant II. Add the 180°.", "3885744594": "arctan answered in quadrant IV. The class total is in quadrant II.", "2262910297": "You dropped the minus rather than correcting the quadrant.", "1078978899": "You added 360°, which lands in quadrant IV. The correction is 180°.", "2331006511": "You divided the wrong way round. tan θ = Ry/Rx.", "686437619": "Check the arithmetic: −53.13° + 180°."}}]};
+const PATH = [[0, 0], [5, 3], [-2, 7], [0, 1], [-9, 9], [-3, 11], [-7, 6], [-15, 13], [-12, 16]];
+const LEGS = {1:[5,3],2:[-7,4],3:[2,-6],4:[-9,8],5:[6,2],6:[-4,-5],7:[-8,7],8:[3,3]};
+const ORDER = ["l1","l2","l3","l4","l5"];
+const HINTS = {
+  l1:"The quadrant is decided by the pair of signs and nothing else. (+,+) is I, and they number counter-clockwise from there. A component of exactly zero puts the vector on an axis, between two quadrants.",
+  l2:"Ax = |A| cos θ and Ay = |A| sin θ — cosine rides with î. For D, remember your calculator's arctan can only answer between −90° and +90°: read the signs of D's components, decide the quadrant yourself, and correct.",
+  l3:"Add x to x and y to y. Never magnitude to magnitude. For 2u−v, double u first and then subtract. For the direction, run the same quadrant check you used on D.",
+  l4:"A·B = AxBx + AyBy. Predict the sign first: leaning the same way is positive, opposing is negative, and perpendicular means the two products cancel exactly. For the sweep, compute 4x + 3y for every leg — one spreadsheet column.",
+  l5:"Sum the x-components of every partial, then the y-components; that is the class total R. Then |R| = √(Rx² + Ry²), and the direction needs the quadrant correction one last time."
+};
+
+let started=false, paused=false, remain=45*60, rejects=0, idx=0, timer=null;
+const $ = s => document.querySelector(s);
+const clock = $("#clock");
+
+function fmt(t){t=Math.max(0,Math.round(t));const m=Math.floor(t/60),s=t%60;
+  return String(m).padStart(2,"0")+":"+String(s).padStart(2,"0");}
+function paint(){clock.textContent=fmt(remain);
+  clock.classList.toggle("warn",started&&remain<=300);clock.classList.toggle("idle",!started);}
+function penalty(sec){remain=Math.max(0,remain-sec);paint();}
+
+function rail(){const r=$("#rail");r.innerHTML="";ORDER.forEach((id,i)=>{const d=document.createElement("div");
+  d.className="pip"+(i<idx?" done":i===idx&&started?" on":"");r.appendChild(d);});}
+
+function hash(str){
+  let s=String(str).trim().toLowerCase().replace(/[−–—]/g,"-").replace(/[^0-9.\-]/g,"");
+  s=s.replace("--","-");
+  if(s.endsWith(".0"))s=s.slice(0,-2);
+  if(s.endsWith("."))s=s.slice(0,-1);
+  if(s==="-0")s="0"; else if(s==="-")s="";
+  let x=2166136261;
+  for(let i=0;i<s.length;i++){x^=s.charCodeAt(i);x=Math.imul(x,16777619)>>>0;}
+  return x>>>0;
+}
+
+function openLock(i){
+  ORDER.forEach((id,j)=>{
+    const el=$("#"+id), st=el.querySelector(".state");
+    el.classList.remove("sealed","active","cleared");
+    st.classList.remove("sealed","active","cleared");
+    if(j<i){el.classList.add("cleared");st.classList.add("cleared");st.textContent="Cleared";}
+    else if(j===i){el.classList.add("active");st.classList.add("active");st.textContent=started?"Awaiting entry":"Ready";}
+    else{el.classList.add("sealed");st.classList.add("sealed");st.textContent="Sealed";}
+  });
+  rail();
+  if(i<ORDER.length){const f=$("#"+ORDER[i]+" input");if(f&&started)f.focus();}
+}
+
+function say(lock,kind,text){const m=$("#m-"+lock);m.className="msg show "+kind;m.textContent=text;}
+
+function submit(lock){
+  if(!started){say(lock,"err","Press Begin shift first — the clock is not running.");return;}
+  const fields=A[lock];let allOk=true,tip=null;
+  fields.forEach(f=>{
+    const el=$("#"+lock+f.key);const hv=hash(el.value);
+    const ok=f.ok.includes(hv)&&el.value.trim()!=="";
+    el.classList.toggle("bad",!ok);el.classList.toggle("good",ok);
+    if(!ok){allOk=false;if(!tip&&f.bad[hv])tip=f.bad[hv];}
+  });
+  if(allOk){
+    say(lock,"tip","");$("#m-"+lock).className="msg";
+    idx++;openLock(idx);
+    if(idx>=ORDER.length)finish();
+    else $("#"+ORDER[idx]).scrollIntoView({behavior:"smooth",block:"center"});
+  }else{
+    rejects++;penalty(20);
+    const el=$("#"+lock);el.classList.remove("shake");void el.offsetWidth;el.classList.add("shake");
+    say(lock,"err",tip?"Rejected · −20 s. "+tip
+      :"Rejected · −20 s. The fields marked in red do not match the server. Check those before transmitting again.");
+  }
+}
+
+function finish(){
+  clearInterval(timer);
+  const used=45*60-remain;
+  $("#s-time").textContent=fmt(used);
+  $("#s-rej").textContent=rejects;
+  $("#end").classList.add("show");
+  drawRoute();
+  $("#end").scrollIntoView({behavior:"smooth",block:"start"});
+}
+
+function drawRoute(){
+  const svg=$("#routeplot"),W=640,H=400,P=42;
+  const xs=PATH.map(p=>p[0]),ys=PATH.map(p=>p[1]);
+  const x0=Math.min(...xs)-1,x1=Math.max(...xs)+1,y0=Math.min(...ys)-1,y1=Math.max(...ys)+1;
+  const k=Math.min((W-2*P)/(x1-x0),(H-2*P)/(y1-y0));
+  const ox=(W-(x1-x0)*k)/2, oy=(H-(y1-y0)*k)/2;
+  const X=v=>ox+(v-x0)*k, Y=v=>H-oy-(v-y0)*k;
+  const ns="http://www.w3.org/2000/svg";
+  const add=(t,at)=>{const e=document.createElementNS(ns,t);
+    for(const a in at)e.setAttribute(a,at[a]);svg.appendChild(e);return e;};
+  svg.innerHTML="";
+  add("rect",{x:0,y:0,width:W,height:H,fill:"#0D1520"});
+  for(let gx=Math.ceil(x0/5)*5;gx<=x1;gx+=5)
+    add("line",{x1:X(gx),y1:Y(y0),x2:X(gx),y2:Y(y1),stroke:"#1E2A38","stroke-width":1});
+  for(let gy=Math.ceil(y0/5)*5;gy<=y1;gy+=5)
+    add("line",{x1:X(x0),y1:Y(gy),x2:X(x1),y2:Y(gy),stroke:"#1E2A38","stroke-width":1});
+  add("line",{x1:X(x0),y1:Y(0),x2:X(x1),y2:Y(0),stroke:"#2E3F52","stroke-width":1.5});
+  add("line",{x1:X(0),y1:Y(y0),x2:X(0),y2:Y(y1),stroke:"#2E3F52","stroke-width":1.5});
+  let d="";PATH.forEach((p,i)=>{d+=(i?"L":"M")+X(p[0])+" "+Y(p[1])+" ";});
+  add("path",{d:d,fill:"none",stroke:"#8FA3B8","stroke-width":2,"stroke-linejoin":"round"});
+  PATH.forEach((p,i)=>{
+    add("circle",{cx:X(p[0]),cy:Y(p[1]),r:3.5,fill:"#0D1520",stroke:"#8FA3B8","stroke-width":1.6});
+    if(i>0&&i<PATH.length-1){const right=p[0]>=(x0+x1)/2;
+      const t=add("text",{x:X(p[0])+(right?9:-9),y:Y(p[1])-8,fill:"#63788D","text-anchor":right?"start":"end",
+      "font-family":"IBM Plex Mono, monospace","font-size":11});t.textContent="P"+i;}
+  });
+  const last=PATH[PATH.length-1];
+  add("line",{x1:X(0),y1:Y(0),x2:X(last[0]),y2:Y(last[1]),stroke:"#F2A93B","stroke-width":3,
+    "stroke-linecap":"round"});
+  add("circle",{cx:X(last[0]),cy:Y(last[1]),r:6,fill:"#F2A93B"});
+  add("circle",{cx:X(0),cy:Y(0),r:6,fill:"#45C08A"});
+  const t1=add("text",{x:X(0)+11,y:Y(0)+16,fill:"#45C08A","font-family":"IBM Plex Mono, monospace",
+    "font-size":12.5});t1.textContent="depot (0,0)";
+  const t2=add("text",{x:X(last[0])+11,y:Y(last[1])-9,fill:"#F2A93B",
+    "font-family":"IBM Plex Mono, monospace","font-size":12.5});t2.textContent="unit 07 (−12, 16)";
+  add("rect",{x:14,y:14,width:196,height:52,fill:"#16202C",stroke:"#2E3F52","stroke-width":1,rx:3});
+  const t3=add("text",{x:26,y:36,fill:"#F2A93B","font-family":"IBM Plex Mono, monospace",
+    "font-size":13,"font-weight":600});t3.textContent="R = 20 km @ 127\u00B0";
+  const t4=add("text",{x:26,y:55,fill:"#8FA3B8","font-family":"IBM Plex Mono, monospace",
+    "font-size":11.5});t4.textContent="8 legs \u00B7 59.9 km driven";
+}
+
+/* ---- leg claiming ---- */
+function renderLegs(claimed){
+  const tb=$("#legtable tbody");tb.innerHTML="";
+  for(let i=1;i<=8;i++){
+    const tr=document.createElement("tr");
+    const on=claimed.includes(i);
+    tr.innerHTML="<td>L"+i+"</td>"+(on
+      ?"<td>"+LEGS[i][0]+"</td><td>"+LEGS[i][1]+"</td>"
+      :'<td class="redact">■ ■ ■</td><td class="redact">■ ■ ■</td>');
+    tb.appendChild(tr);
+  }
+}
+renderLegs([]);
+
+/* ---- events ---- */
+$("#begin").addEventListener("click",()=>{
+  if(started)return;started=true;$("#begin").disabled=true;$("#begin").textContent="Shift running";
+  openLock(idx);paint();
+  timer=setInterval(()=>{if(!paused){remain--;paint();if(remain<=0){clearInterval(timer);}}},1000);
+});
+document.querySelectorAll("[data-submit]").forEach(b=>
+  b.addEventListener("click",()=>submit(b.dataset.submit)));
+document.querySelectorAll("[data-hint]").forEach(b=>b.addEventListener("click",()=>{
+  const k=b.dataset.hint;if(!started){say(k,"err","Press Begin shift first.");return;}
+  penalty(60);say(k,"tip","Hint · −60 s. "+HINTS[k]);}));
+document.querySelectorAll("input").forEach(i=>i.addEventListener("keydown",e=>{
+  if(e.key==="Enter"){const sec=i.closest(".lock");if(sec)submit(sec.id);}}));
+$("#claimbtn").addEventListener("click",()=>{
+  const nums=($("#claim").value.match(/[1-8]/g)||[]).map(Number);
+  renderLegs([...new Set(nums)]);
+  if(nums.length>2&&started){penalty(60);say("l5","err","More than two legs claimed · −60 s.");}
+});
+$("#passbtn").addEventListener("click",()=>{
+  if($("#pass").value.trim().toUpperCase()==="MA1003B"){
+    $("#ctrl-gate").style.display="none";$("#ctrl-body").classList.add("open");buildBoard();
+  }else{$("#pass").classList.add("bad");}
+});
+$("#pass").addEventListener("keydown",e=>{if(e.key==="Enter")$("#passbtn").click();});
+
+function buildBoard(){
+  const b=$("#board");if(b.children.length)return;
+  for(let t=1;t<=8;t++){
+    const d=document.createElement("div");d.className="field";
+    d.innerHTML='<label>Team '+t+' &nbsp; x , y</label><input type="text" class="bteam" autocomplete="off" placeholder="0 , 0">';
+    b.appendChild(d);
+  }
+  b.addEventListener("input",()=>{
+    let sx=0,sy=0;
+    document.querySelectorAll(".bteam").forEach(i=>{
+      const m=i.value.replace(/[−–—]/g,"-").match(/-?\d+(\.\d+)?/g);
+      if(m&&m.length>=2){sx+=parseFloat(m[0]);sy+=parseFloat(m[1]);}
+    });
+    $("#boardtotal").textContent="Class total:  ( "+(Math.round(sx*100)/100)+" î "+
+      (sy<0?"− ":"+ ")+Math.abs(Math.round(sy*100)/100)+" ĵ ) km";
+  });
+}
+$("#add5").addEventListener("click",()=>{remain+=300;paint();});
+$("#pause").addEventListener("click",()=>{paused=!paused;$("#pause").textContent=paused?"Resume":"Pause";});
+
+openLock(0);paint();
+</script>
+</body>
+</html>
